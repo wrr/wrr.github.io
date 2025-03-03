@@ -1,0 +1,38 @@
+Random walk illustrated with D3
+===============================
+
+I'm playing with `D3 <https://github.com/mbostock/d3>`_ and I'm
+impressed how easy it is to create visualisations with this library.
+Below is my first attempt: a visualisation of a random walk (see `the
+code <https://gist.github.com/wrr/4750218>`_).  The mechanism is
+simple: each step of the walk is made either in the left or the right
+direction depending on a result of a coin flip. After several steps, a
+destination point is marked and a new walk is started.
+
+.. raw:: html
+
+   <p><iframe width="575" height="550"
+       src="/random_walk.html"
+       frameborder="0"
+       allowfullscreen="on"> </iframe></p>
+
+If the simulation runs for some time, the destination points start to
+resemble the bell curve. Most points are near the centre, and it is
+very unlikely for any point to be at the edges.  This is in line with
+a probability theory: for large number of walks, probability that a
+point is reached follows a normal distribution.
+
+Some interesting facts about random walks:
+
+- During a random walk of an infinite length, each point is reached
+  an infinite number of times.
+- During a random walk of an infinite length, a series of steps in one
+  direction (for example left, left, left, left, ...) of any finite
+  length will be made an infinite number of times.
+
+
+
+.. author:: default
+.. categories:: none
+.. tags:: none
+.. comments::

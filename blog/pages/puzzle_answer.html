@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+        <meta charset="utf-8">
+        <meta name="description" content="My blog">
+        <meta name="viewport" content="width=device-width">
+        <title>C++ puzzle answer &mdash; Random notes</title>
+            <link rel="stylesheet" href="../_static/normalize.css" type="text/css">
+            <link rel="stylesheet" href="../_static/sphinx.css" type="text/css">
+            <link rel="stylesheet" href="../_static/main.css" type="text/css">
+            <link rel="stylesheet" href="../_static/modern5.css" type="text/css">
+            <link rel="stylesheet" href="../_static/pygments.css" type="text/css">
+            <link rel="stylesheet" href="../_static/font-awesome.min.css" type="text/css">
+            <link rel="stylesheet" href="/style.css" type="text/css">
+        <link rel="shortcut icon" href="../_static/life.png"><link rel="search" title="Search" href="../search.html"><link rel="alternate" type="application/rss+xml" title="RSS" href="../rss.html"></head>
+    <body>
+      <div id="container" class="content"><div class="menu">
+        <span class="menu-item">
+          <a href="/">Projects</a></span>
+        <span class="menu-spacer"></span>
+        <span class="menu-item selected">
+          <a href="/blog/">Blog</a></span>
+        <span class="menu-spacer"></span>
+        <span class="menu-item">
+          <a href="/about.html">About</a></span>
+        <span class="menu-item menu-item-rss">
+            <span class="rss">
+              <a href="/blog/rss.html" title="Subscribe via RSS"><span class="fa fa-lg fa-rss"></span></a>
+            </span>
+        </span>
+      </div><div class="main-container" role="main"><div class="main wrapper body clearfix"><article>
+                    <div class="section" id="c-puzzle-answer">
+<h1>C++ puzzle answer</h1>
+<p><span class="docutils literal"><span class="pre">x</span></span> can change and here is how:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stdio.h&gt;</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Puzzle</span><span class="w"> </span><span class="p">{</span>
+<span class="w"> </span><span class="k">public</span><span class="o">:</span>
+<span class="w">  </span><span class="n">Puzzle</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">x_arg</span><span class="p">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">x</span><span class="p">(</span><span class="n">x_arg</span><span class="p">)</span><span class="w"> </span><span class="p">{}</span>
+
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">get_x</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">x</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="n">change_x</span><span class="p">(</span><span class="n">Puzzle</span><span class="o">&amp;</span><span class="w"> </span><span class="n">r</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">new_x</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">r</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">new_x</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w"> </span><span class="k">private</span><span class="o">:</span>
+<span class="w">  </span><span class="c1">// Disable default operator=</span>
+<span class="w">  </span><span class="n">Puzzle</span><span class="o">&amp;</span><span class="w"> </span><span class="k">operator</span><span class="o">=</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Puzzle</span><span class="o">&amp;</span><span class="p">);</span>
+
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="n">Puzzle</span><span class="w"> </span><span class="n">r1</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+<span class="w">  </span><span class="n">Puzzle</span><span class="w"> </span><span class="n">r2</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+<span class="w">  </span><span class="n">r1</span><span class="p">.</span><span class="n">change_x</span><span class="p">(</span><span class="n">r2</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span>
+<span class="w">  </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;%d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">r2</span><span class="p">.</span><span class="n">get_x</span><span class="p">());</span>
+<span class="w">  </span><span class="c1">// This is also valid:</span>
+<span class="w">  </span><span class="n">r1</span><span class="p">.</span><span class="n">change_x</span><span class="p">(</span><span class="n">r1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span>
+<span class="w">  </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;%d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">r1</span><span class="p">.</span><span class="n">get_x</span><span class="p">());</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>In C++ access control modifiers (<span class="docutils literal"><span class="pre">public</span></span>, <span class="docutils literal"><span class="pre">protected</span></span>,
+<span class="docutils literal"><span class="pre">private</span></span>) work on a class level. Objects of the same class can
+access and modify private fields of each other. The <span class="docutils literal"><span class="pre">const</span></span> keyword
+only guarantees the object on which the const method is called won’t
+change its state, it is legal to alter state of an object passed via a
+non-const argument.</p>
+<p>Not in all object oriented languages access control modifiers work on
+a class level. For example, in Ruby an object can’t invoke private
+methods of other objects of the same class.</p>
+</div>
+
+    <div class="postmeta">
+        
+        
+        
+        </div>
+    </article><aside class="sidebar"><section><div class="widget">
+    <h1>All posts</h1>
+    <ul><li >
+            <a href="../2024/12/16/improving_unit_test_coverage_with_gemini.html">Improving Unit Test Coverage with Gemini</a>
+        </li><li >
+            <a href="../2014/08/18/shapespark.html">Shapespark</a>
+        </li><li >
+            <a href="../2014/01/08/wwwhisper_add_on_for_node_js.html">wwwhisper add-on for Node.js</a>
+        </li><li >
+            <a href="../2013/05/13/object_oriented_programming_with_closures.html">Object Oriented Programming with closures</a>
+        </li><li >
+            <a href="../2013/04/24/wwwhisper_add_on_released.html">wwwhisper add-on released</a>
+        </li><li >
+            <a href="../2013/04/11/dos_attack_on_cdn_users.html">DoS attack on CDN users</a>
+        </li><li >
+            <a href="../2013/04/10/wwwhisper_add_on_update.html">wwwhisper add-on update</a>
+        </li><li >
+            <a href="../2013/04/10/underhanded_c_contest.html">Underhanded C Contest</a>
+        </li><li >
+            <a href="../2013/03/20/wwwhisper_heroku_add_on_update.html">wwwhisper add-on update</a>
+        </li><li >
+            <a href="../2013/02/10/random_walk_illustrated_with_d3.html">Random walk illustrated with D3</a>
+        </li><li >
+            <a href="../2013/02/06/django_db_pool_on_heroku.html">Django DB Pool on Heroku</a>
+        </li><li >
+            <a href="../2013/01/31/wwwhisper_heroku_add_on.html">wwwhisper Heroku add-on</a>
+        </li><li >
+            <a href="../2012/12/16/c___puzzle.html">C++ puzzle</a>
+        </li><li >
+            <a href="../2012/12/09/productivity_tip_of_the_week.html">Productivity Tip of the Week</a>
+        </li><li >
+            <a href="../2012/11/14/wwwhisper_on_openshift.html">wwwhisper on OpenShift</a>
+        </li><li >
+            <a href="../2012/11/05/sibling_domains_cookies_isolation_.html">Sibling domains cookies isolation</a>
+        </li></ul>
+</div>
+</section></aside></div> <!-- #main --></div> <!-- #main-container -->
+
+        <div class="footer-container" role="contentinfo"><footer class="wrapper">&copy; Copyright Jan Wrobel </footer></div> <!-- footer-container -->
+
+      </div> <!--! end of #container -->
+
+    <a href="/life.html"><img class="life" src="/still_life.png" alt="still life"></a>
+    </body>
+</html>

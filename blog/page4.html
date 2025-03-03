@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+        <meta charset="utf-8">
+        <meta name="description" content="My blog">
+        <meta name="viewport" content="width=device-width">
+        <title>Page 4 &mdash; Random notes</title>
+            <link rel="stylesheet" href="_static/normalize.css" type="text/css">
+            <link rel="stylesheet" href="_static/sphinx.css" type="text/css">
+            <link rel="stylesheet" href="_static/main.css" type="text/css">
+            <link rel="stylesheet" href="_static/modern5.css" type="text/css">
+            <link rel="stylesheet" href="_static/pygments.css" type="text/css">
+            <link rel="stylesheet" href="_static/font-awesome.min.css" type="text/css">
+            <link rel="stylesheet" href="/style.css" type="text/css">
+        <link rel="shortcut icon" href="_static/life.png"><link rel="search" title="Search" href="search.html"><link rel="next" title="Older" href="page5.html"><link rel="prev" title="Newer" href="page3.html"><link rel="alternate" type="application/rss+xml" title="RSS" href="rss.html"></head>
+    <body>
+      <div id="container" class="content"><div class="menu">
+        <span class="menu-item">
+          <a href="/">Projects</a></span>
+        <span class="menu-spacer"></span>
+        <span class="menu-item selected">
+          <a href="/blog/">Blog</a></span>
+        <span class="menu-spacer"></span>
+        <span class="menu-item">
+          <a href="/about.html">About</a></span>
+        <span class="menu-item menu-item-rss">
+            <span class="rss">
+              <a href="/blog/rss.html" title="Subscribe via RSS"><span class="fa fa-lg fa-rss"></span></a>
+            </span>
+        </span>
+      </div><div class="main-container" role="main"><div class="main wrapper body clearfix"><article>
+                    <div class="section">
+            <h1><a href="2013/05/13/object_oriented_programming_with_closures.html">Object Oriented Programming with closures</a></h1>
+<p>I’ve been recently watching <a class="reference external" href="https://ocw.mit.edu/courses/6-001-structure-and-interpretation-of-computer-programs-spring-2005/video_galleries/video-lectures/">Structure and Interpretation of Computer
+Programs</a>.
+These are great lectures that I highly recommend to everyone
+interested in programming. Some people can be discouraged by the use
+of Scheme, don’t be. Scheme is a tiny language, very easy to pickup
+and follow, and many techniques from the lectures are applicable to
+today’s mainstream languages.</p>
+<p>One interesting idea is that closures are enough to implement an
+object-oriented system. A simple example is a counter object. In
+JavaScript it can be implemented like this:</p>
+<div class="highlight-js notranslate"><div class="highlight"><pre><span/><span class="kd">function</span><span class="w"> </span><span class="nx">counter</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">var</span><span class="w"> </span><span class="nx">val</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0</span><span class="p">;</span>
+<span class="w">  </span><span class="kd">function</span><span class="w"> </span><span class="nx">get</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">val</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="kd">function</span><span class="w"> </span><span class="nx">inc</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">val</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="mf">1</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="p">[</span><span class="nx">get</span><span class="p">,</span><span class="w"> </span><span class="nx">inc</span><span class="p">];</span>
+<span class="p">}</span>
+
+<span class="kd">function</span><span class="w"> </span><span class="nx">get_count</span><span class="p">(</span><span class="nx">counter</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nx">counter</span><span class="p">[</span><span class="mf">0</span><span class="p">]();</span>
+<span class="p">}</span>
+
+<span class="kd">function</span><span class="w"> </span><span class="nx">inc_count</span><span class="p">(</span><span class="nx">counter</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">counter</span><span class="p">[</span><span class="mf">1</span><span class="p">]();</span>
+<span class="p">}</span>
+
+<span class="kd">var</span><span class="w"> </span><span class="nx">counter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">counter</span><span class="p">();</span>
+<span class="nx">inc_count</span><span class="p">(</span><span class="nx">counter</span><span class="p">);</span>
+<span class="nx">inc_count</span><span class="p">(</span><span class="nx">counter</span><span class="p">);</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">get_count</span><span class="p">(</span><span class="nx">counter</span><span class="p">));</span><span class="w"> </span><span class="c1">// prints 2</span>
+</pre></div>
+</div>
+<p>A statefull counter exposes a public interface for
+increasing and obtaining a current count. The internals are
+encapsulated, you can not reset or decrease the count, because such
+operations are not exposed by the API.</p>
+<p>You can easily define your own version of the counter, and use
+it in any place where the counter is expected:</p>
+<div class="highlight-js notranslate"><div class="highlight"><pre><span/><span class="kd">function</span><span class="w"> </span><span class="nx">fast_counter</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">var</span><span class="w"> </span><span class="nx">val</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0</span><span class="p">;</span>
+<span class="w">  </span><span class="kd">function</span><span class="w"> </span><span class="nx">get</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">val</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="kd">function</span><span class="w"> </span><span class="nx">inc</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">val</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="mf">2</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="p">[</span><span class="nx">get</span><span class="p">,</span><span class="w"> </span><span class="nx">inc</span><span class="p">];</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The implementation above makes one shortcut: a JavaScript built-in
+Array object is used to store and dispatch counter’s internal
+methods. This is convenient, but not necessary. The lectures show that
+closures are enough to implement data structures without a need for
+any built-in complex data types (‘out of thin air’ as lecturers call
+it). The trick is stunning and really worth studying. First we need a
+function that creates a pair:</p>
+<div class="highlight-js notranslate"><div class="highlight"><pre><span/><span class="kd">function</span><span class="w"> </span><span class="nx">pair</span><span class="p">(</span><span class="nx">first</span><span class="p">,</span><span class="w"> </span><span class="nx">second</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">// In Lisp called `cons`</span>
+<span class="w">  </span><span class="kd">function</span><span class="w"> </span><span class="nx">set_first</span><span class="p">(</span><span class="nx">value</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">first</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">value</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="kd">function</span><span class="w"> </span><span class="nx">set_second</span><span class="p">(</span><span class="nx">value</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">second</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">value</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="kd">function</span><span class="p">(</span><span class="nx">handler</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">handler</span><span class="p">(</span><span class="nx">first</span><span class="p">,</span><span class="w"> </span><span class="nx">second</span><span class="p">,</span><span class="w"> </span><span class="nx">set_first</span><span class="p">,</span><span class="w"> </span><span class="nx">set_second</span><span class="p">);</span>
+<span class="w">  </span><span class="p">};</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>A pair returned by the function is not data, but code: a closure. The
+closure needs to be invoked with a function as an argument, and it
+gives this function permissions to access and modify the values stored
+in the pair.</p>
+<p>Here is how the first element of the pair can be extracted:</p>
+<div class="highlight-js notranslate"><div class="highlight"><pre><span/><span class="kd">function</span><span class="w"> </span><span class="nx">first</span><span class="p">(</span><span class="nx">pair</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">// aka car</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nx">pair</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">first</span><span class="p">,</span><span class="w"> </span><span class="nx">second</span><span class="p">,</span><span class="w"> </span><span class="nx">set_first</span><span class="p">,</span><span class="w"> </span><span class="nx">set_second</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">first</span><span class="p">;</span>
+<span class="w">  </span><span class="p">});</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>first() invokes a pair() and passes a function to it. The function is
+then invoked by the pair with its two current values and two functions
+to change the current values. first() cares only about the value of
+the first element and ignores remaining arguments.</p>
+<p>Below are three more analogous functions to operate on the pair:</p>
+<div class="highlight-js notranslate"><div class="highlight"><pre><span/><span class="kd">function</span><span class="w"> </span><span class="nx">second</span><span class="p">(</span><span class="nx">pair</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">// aka cdr</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nx">pair</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">first</span><span class="p">,</span><span class="w"> </span><span class="nx">second</span><span class="p">,</span><span class="w"> </span><span class="nx">set_first</span><span class="p">,</span><span class="w"> </span><span class="nx">set_second</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">second</span><span class="p">;</span>
+<span class="w">  </span><span class="p">});</span>
+<span class="p">}</span>
+
+<span class="kd">function</span><span class="w"> </span><span class="nx">set_first</span><span class="p">(</span><span class="nx">pair</span><span class="p">,</span><span class="w"> </span><span class="nx">value</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">// aka set-car!</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nx">pair</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">first</span><span class="p">,</span><span class="w"> </span><span class="nx">second</span><span class="p">,</span><span class="w"> </span><span class="nx">set_first</span><span class="p">,</span><span class="w"> </span><span class="nx">set_second</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">set_first</span><span class="p">(</span><span class="nx">value</span><span class="p">);</span>
+<span class="w">  </span><span class="p">});</span>
+<span class="p">}</span>
+
+<span class="kd">function</span><span class="w"> </span><span class="nx">set_second</span><span class="p">(</span><span class="nx">pair</span><span class="p">,</span><span class="w"> </span><span class="nx">value</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">// aka set-cdr!</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nx">pair</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">first</span><span class="p">,</span><span class="w"> </span><span class="nx">second</span><span class="p">,</span><span class="w"> </span><span class="nx">set_first</span><span class="p">,</span><span class="w"> </span><span class="nx">set_second</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">set_second</span><span class="p">(</span><span class="nx">value</span><span class="p">);</span>
+<span class="w">  </span><span class="p">});</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The internals are hairy, but resulting high level interface is simple:</p>
+<div class="highlight-js notranslate"><div class="highlight"><pre><span/><span class="kd">var</span><span class="w"> </span><span class="nx">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">pair</span><span class="p">(</span><span class="mf">3</span><span class="p">,</span><span class="w"> </span><span class="mf">4</span><span class="p">);</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">first</span><span class="p">(</span><span class="nx">p</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s2">" : "</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">second</span><span class="p">(</span><span class="nx">p</span><span class="p">));</span>
+<span class="nx">set_first</span><span class="p">(</span><span class="nx">p</span><span class="p">,</span><span class="w"> </span><span class="mf">5</span><span class="p">);</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">first</span><span class="p">(</span><span class="nx">p</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s2">" : "</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">second</span><span class="p">(</span><span class="nx">p</span><span class="p">));</span>
+</pre></div>
+</div>
+<p>And pairs are enough to build a list:</p>
+<div class="highlight-js notranslate"><div class="highlight"><pre><span/><span class="kd">var</span><span class="w"> </span><span class="nx">l</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">pair</span><span class="p">(</span><span class="mf">3</span><span class="p">,</span><span class="w"> </span><span class="nx">pair</span><span class="p">(</span><span class="mf">4</span><span class="p">,</span><span class="w"> </span><span class="nx">pair</span><span class="p">(</span><span class="mf">5</span><span class="p">,</span><span class="w"> </span><span class="kc">null</span><span class="p">)));</span>
+</pre></div>
+</div>
+<p>Of course, a higher level interface can be defined, this time very
+straight-forward:</p>
+<div class="highlight-js notranslate"><div class="highlight"><pre><span/><span class="kd">function</span><span class="w"> </span><span class="nx">list</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kd">function</span><span class="w"> </span><span class="nx">is_empty</span><span class="p">(</span><span class="nx">list</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nx">list</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kd">function</span><span class="w"> </span><span class="nx">last</span><span class="p">(</span><span class="nx">list</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">is_empty</span><span class="p">(</span><span class="nx">list</span><span class="p">)</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nx">second</span><span class="p">(</span><span class="nx">list</span><span class="p">)</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">list</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nx">last</span><span class="p">(</span><span class="nx">second</span><span class="p">(</span><span class="nx">list</span><span class="p">));</span>
+<span class="p">}</span>
+
+<span class="kd">function</span><span class="w"> </span><span class="nx">length</span><span class="p">(</span><span class="nx">list</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">is_empty</span><span class="p">(</span><span class="nx">list</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mf">0</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="mf">1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">length</span><span class="p">(</span><span class="nx">second</span><span class="p">(</span><span class="nx">list</span><span class="p">));</span>
+<span class="p">}</span>
+
+<span class="kd">function</span><span class="w"> </span><span class="nx">append</span><span class="p">(</span><span class="nx">list</span><span class="p">,</span><span class="w"> </span><span class="nx">value</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">is_empty</span><span class="p">(</span><span class="nx">list</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">pair</span><span class="p">(</span><span class="nx">value</span><span class="p">,</span><span class="w"> </span><span class="kc">null</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="nx">set_second</span><span class="p">(</span><span class="nx">last</span><span class="p">(</span><span class="nx">list</span><span class="p">),</span><span class="w"> </span><span class="nx">pair</span><span class="p">(</span><span class="nx">value</span><span class="p">,</span><span class="w"> </span><span class="kc">null</span><span class="p">));</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nx">list</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kd">function</span><span class="w"> </span><span class="nx">get_item</span><span class="p">(</span><span class="nx">list</span><span class="p">,</span><span class="w"> </span><span class="nx">idx</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">idx</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="mf">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">first</span><span class="p">(</span><span class="nx">list</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nx">get_item</span><span class="p">(</span><span class="nx">second</span><span class="p">(</span><span class="nx">list</span><span class="p">),</span><span class="w"> </span><span class="nx">idx</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mf">1</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kd">var</span><span class="w"> </span><span class="nx">l</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">list</span><span class="p">();</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">is_empty</span><span class="p">(</span><span class="nx">l</span><span class="p">));</span>
+<span class="nx">l</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">append</span><span class="p">(</span><span class="nx">l</span><span class="p">,</span><span class="w"> </span><span class="mf">1</span><span class="p">);</span>
+<span class="nx">l</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">append</span><span class="p">(</span><span class="nx">l</span><span class="p">,</span><span class="w"> </span><span class="mf">2</span><span class="p">);</span>
+<span class="nx">l</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">append</span><span class="p">(</span><span class="nx">l</span><span class="p">,</span><span class="w"> </span><span class="mf">3</span><span class="p">);</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">is_empty</span><span class="p">(</span><span class="nx">l</span><span class="p">));</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">get_item</span><span class="p">(</span><span class="nx">l</span><span class="p">,</span><span class="w"> </span><span class="mf">1</span><span class="p">));</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">length</span><span class="p">(</span><span class="nx">l</span><span class="p">));</span>
+</pre></div>
+</div>
+<p>This is just an exercise, even in Lisp pairs (cons cells) are unlikely
+to be implemented this way. But it is interesting to see how powerful
+closures are, and how they allow to blur the distinction between code
+and data.</p>
+
+        </div>
+        <div class="postmeta">
+        <div class="author">
+            <span>Posted by Jan Wrobel; May 13, 2013</span>
+        </div>
+        
+        
+        </div><div class="archive_link">
+        <a href="archive.html"> &mdash; Blog Archive &mdash; </a>
+    </div></article><aside class="sidebar"><section><div class="widget">
+    <h1>All posts</h1>
+    <ul><li >
+            <a href="2024/12/16/improving_unit_test_coverage_with_gemini.html">Improving Unit Test Coverage with Gemini</a>
+        </li><li >
+            <a href="2014/08/18/shapespark.html">Shapespark</a>
+        </li><li >
+            <a href="2014/01/08/wwwhisper_add_on_for_node_js.html">wwwhisper add-on for Node.js</a>
+        </li><li >
+            <a href="2013/05/13/object_oriented_programming_with_closures.html">Object Oriented Programming with closures</a>
+        </li><li >
+            <a href="2013/04/24/wwwhisper_add_on_released.html">wwwhisper add-on released</a>
+        </li><li >
+            <a href="2013/04/11/dos_attack_on_cdn_users.html">DoS attack on CDN users</a>
+        </li><li >
+            <a href="2013/04/10/wwwhisper_add_on_update.html">wwwhisper add-on update</a>
+        </li><li >
+            <a href="2013/04/10/underhanded_c_contest.html">Underhanded C Contest</a>
+        </li><li >
+            <a href="2013/03/20/wwwhisper_heroku_add_on_update.html">wwwhisper add-on update</a>
+        </li><li >
+            <a href="2013/02/10/random_walk_illustrated_with_d3.html">Random walk illustrated with D3</a>
+        </li><li >
+            <a href="2013/02/06/django_db_pool_on_heroku.html">Django DB Pool on Heroku</a>
+        </li><li >
+            <a href="2013/01/31/wwwhisper_heroku_add_on.html">wwwhisper Heroku add-on</a>
+        </li><li >
+            <a href="2012/12/16/c___puzzle.html">C++ puzzle</a>
+        </li><li >
+            <a href="2012/12/09/productivity_tip_of_the_week.html">Productivity Tip of the Week</a>
+        </li><li >
+            <a href="2012/11/14/wwwhisper_on_openshift.html">wwwhisper on OpenShift</a>
+        </li><li >
+            <a href="2012/11/05/sibling_domains_cookies_isolation_.html">Sibling domains cookies isolation</a>
+        </li></ul>
+</div>
+</section></aside></div> <!-- #main --></div> <!-- #main-container -->
+
+        <div class="footer-container" role="contentinfo"><footer class="wrapper">&copy; Copyright Jan Wrobel </footer></div> <!-- footer-container -->
+
+      </div> <!--! end of #container -->
+
+    <a href="/life.html"><img class="life" src="/still_life.png" alt="still life"></a>
+    </body>
+</html>

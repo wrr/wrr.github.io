@@ -1,0 +1,20 @@
+Underhanded C Contest
+=====================
+
+The Underhanded C Contest is in a way an opposite of the Obfuscated C
+Code Contest. The task is to write a readable and elegant piece of
+code that looks legitimate but hides a malicious feature. The feature
+should ideally look like an unfortunate mistake, not something
+intentionally added.
+
+The contest is now back after four years of inactivity and `the 2009
+results are finally posted
+<https://web.archive.org/web/20131205052658/http://bingweb.binghamton.edu/~scraver/underhanded/>`_. Here is my `runner-up 2009
+entry <https://github.com/wrr/underhanded-c/blob/master/luggage.c>`_.
+
+
+
+.. author:: default
+.. categories:: none
+.. tags:: none
+.. comments::

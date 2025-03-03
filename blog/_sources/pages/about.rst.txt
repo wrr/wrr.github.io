@@ -1,0 +1,18 @@
+About
+======
+
+**"We are what we pretend to be, so we must be careful about what we pretend to be."**
+-- *Kurt Vonnegut*
+
+Hello, I'm Janek (or shortly Jan), a Software Engineer with main interests in
+distributed systems, software design, computer networks and security.
+
+I plan to keep this blog technical and write mostly about stuff that
+is not widely covered elsewhere.
+
+I hold a Master's and engineering degree in Computer Science. I had a
+privilege of being mentored by Len Sassaman while developing
+Firekeeper. I've also worked at Google for several years. Currently I share
+time between contracting jobs and an attempt to bootstrap a
+`business <https://addons.heroku.com/wwwhisper/>`_.
+

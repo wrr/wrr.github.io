@@ -1,0 +1,219 @@
+/* Use: https://gwfh.mranftl.com/fonts */
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  src: url('/fonts/inter-v13-latin-regular.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  src: url('/fonts/inter-v13-latin-600.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 800;
+  src: url('/fonts/inter-v13-latin-800.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Source Serif 4';
+  font-style: normal;
+  font-weight: 400;
+  src: url('/fonts/source-serif-4-v8-latin-regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Source Serif 4';
+  font-style: italic;
+  font-weight: 400;
+  src: url('/fonts/source-serif-4-v8-latin-italic.woff2') format('woff2');
+}
+
+ 
+@font-face {
+  font-display: swap;
+  font-family: 'Source Serif 4';
+  font-style: normal;
+  font-weight: 600;
+  src: url('../fonts/source-serif-4-v8-latin-600.woff2') format('woff2');
+}
+@font-face {
+  font-display: swap;
+  font-family: 'Source Serif 4';
+  font-style: italic;
+  font-weight: 600;
+  src: url('../fonts/source-serif-4-v8-latin-600italic.woff2') format('woff2');
+}
+@font-face {
+  font-display: swap;
+  font-family: 'Source Serif 4';
+  font-style: normal;
+  font-weight: 800;
+  src: url('../fonts/source-serif-4-v8-latin-800.woff2') format('woff2');
+}
+@font-face {
+  font-display: swap;
+  font-family: 'Source Serif 4';
+  font-style: italic;
+  font-weight: 800;
+  src: url('../fonts/source-serif-4-v8-latin-800italic.woff2') format('woff2');
+}
+
+body {
+  background: #333333;
+  font-family: 'Inter', sans-serif;
+  font-weight: normal;
+  line-height: 1.5;
+  vertical-align: baseline;
+  color: #333333;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 1100px;
+  font-size: 18px;
+  text-rendering: optimizeLegibility;
+}
+
+@media (max-width: 800px) {
+  body {
+    margin: 10px 0px 10px 0px;
+  }
+}
+
+h1 {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 0.5em;
+}
+
+h2 {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+h3 {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+article h1:not(.archive h1) {
+  font-size: 26px;
+  font-weight: 600;
+  margin-bottom: 0.5em;
+}
+
+article h2:not(.archive h2) {
+  font-size: 22px;
+  font-weight: 600;
+}
+
+article h3:not(.archive h3) {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+a, a:visited {
+  color: #0b7dc0;
+  text-decoration: none;
+}
+
+
+.menu {
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 40px;
+  width: 100%;
+}
+
+.menu-item {
+  padding-bottom: 1px;
+}
+
+.menu-item-rss {
+  float: right;
+}
+
+.menu-item > a {
+  text-decoration: none;
+  color: #333333;
+}
+.menu-spacer {
+  margin-left: 1.5em;
+}
+
+@media (max-width: 380px) {
+  .menu-spacer {
+    margin-left: 0.75em;
+  }
+}
+
+.menu-item.selected {
+  border-bottom: 5px solid #e04646;
+}
+
+img {
+  border-style: none;
+}
+
+img.life {
+  margin-top:15px;
+  margin-bottom:15px;
+  margin-right: 15px;
+  float: right;
+}
+
+div.content {
+  padding: 30px 20px 10px 20px;
+  background: white;
+  padding-left: 4%;
+  padding-right: 4%;
+}
+
+
+.project {
+  margin-bottom: 2em;
+  border-left: 2px solid #333333;
+  padding-top: 1px;
+  padding-bottom: 1px;
+  padding-left: 20px;
+  background: white;
+}
+
+p {
+  margin-top: 0;
+  max-width: 75ch;
+  min-width: 20ch;
+  font-family: 'Source Serif 4', sans-serif;
+  font-size: 20px;
+}
+
+article p {
+  margin-top: 1em;
+}
+
+.main-container {
+  /*margin-left: auto;*/
+  margin-right: auto;
+  /*max-width: 75ch;*/
+}
+
+li.blog-post-current::marker {
+  color: #e04646;
+}
+
+
+.error {
+  border-left: 8px solid #e04646;
+  font-weight: 800;
+  margin-top: 50px;
+  margin-bottom: 50px;
+  padding-top: 30px;
+  padding-bottom: 30px;
+  padding-left: 30px;
+  font-size: 64px;
+}

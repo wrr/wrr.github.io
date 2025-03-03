@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+        <meta charset="utf-8">
+        <meta name="description" content="My blog">
+        <meta name="viewport" content="width=device-width">
+        <title>DoS attack on CDN users &mdash; Random notes</title>
+            <link rel="stylesheet" href="../../../_static/normalize.css" type="text/css">
+            <link rel="stylesheet" href="../../../_static/sphinx.css" type="text/css">
+            <link rel="stylesheet" href="../../../_static/main.css" type="text/css">
+            <link rel="stylesheet" href="../../../_static/modern5.css" type="text/css">
+            <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css">
+            <link rel="stylesheet" href="../../../_static/font-awesome.min.css" type="text/css">
+            <link rel="stylesheet" href="/style.css" type="text/css">
+        <link rel="shortcut icon" href="../../../_static/life.png"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="wwwhisper add-on update" href="../10/wwwhisper_add_on_update.html"><link rel="prev" title="wwwhisper add-on released" href="../24/wwwhisper_add_on_released.html"><link rel="alternate" type="application/rss+xml" title="RSS" href="../../../rss.html"></head>
+    <body>
+      <div id="container" class="content"><div class="menu">
+        <span class="menu-item">
+          <a href="/">Projects</a></span>
+        <span class="menu-spacer"></span>
+        <span class="menu-item selected">
+          <a href="/blog/">Blog</a></span>
+        <span class="menu-spacer"></span>
+        <span class="menu-item">
+          <a href="/about.html">About</a></span>
+        <span class="menu-item menu-item-rss">
+            <span class="rss">
+              <a href="/blog/rss.html" title="Subscribe via RSS"><span class="fa fa-lg fa-rss"></span></a>
+            </span>
+        </span>
+      </div><div class="main-container" role="main"><div class="main wrapper body clearfix"><article>
+                    <div class="section" id="dos-attack-on-cdn-users">
+<h1>DoS attack on CDN users</h1>
+<p><a class="reference external" href="/blog/2012/11/05/sibling_domains_cookies_isolation_.html">Sibling domains cookie isolation</a>
+got some publicity recently when GitHub moved user generated pages to
+<span class="docutils literal"><span class="pre">github.io</span></span>. <a class="reference external" href="https://lcamtuf.blogspot.com/2010/10/http-cookies-or-how-not-to-design.html">The problem is not new</a>,
+but many sites still ignore it. One issue that somehow escaped popular
+perception is that cookie isolation policy can be exploited to break
+sites that depend on content hosted on Content Delivery Networks.</p>
+<p>The issue affects most CDN providers, let me use RackCDN for
+illustration. <a class="reference external" href="https://github.com/wrr/cookie-bomb/blob/master/bomb.html">A malicious JavaScript</a> embedded
+in an HTML file served from <span class="docutils literal"><span class="pre">foo.rackcdn.com</span></span> subdomain (visited
+directly or iframed, so its origin is <span class="docutils literal"><span class="pre">foo.rackcdn.com</span></span>) can set a
+large number of large cookies with a domain attribute set to
+<span class="docutils literal"><span class="pre">rackcdn.com</span></span>. Such cookies are then sent with all future requests
+to all <span class="docutils literal"><span class="pre">*.rackcdn.com</span></span> subdomains.</p>
+<p>Firefox allows combined size of cookies for a domain to have 614KB,
+Chrome 737KB, IE 10KB. After a visit to a malicious site that iframes
+the cookie setting HTML from <span class="docutils literal"><span class="pre">foo.rackcdn.com</span></span>, each subsequent
+request to any subdomain of the CDN is going to carry many KB of
+cookies. This effectively prevents the browser from accessing any
+content on <span class="docutils literal"><span class="pre">*.rackcdn.com</span></span>. HTTP servers are configured to limit the
+size of HTTP headers that clients can sent. Common and reasonable
+limits are 4KB or 8KB. If the limit is exceeded, the offending request
+is rejected. In my tests I haven’t found a single server that would
+accept ~0.5MB worth of headers, popular responses are:</p>
+<ul class="simple">
+<li>TCP Reset while the client is still sending.</li>
+<li>HTTP error code 4XX (400, 413, 431 or 494) and TCP reset while the
+client is still sending.</li>
+<li>HTTP error code 4XX after a request is fully transferred.</li>
+</ul>
+<p>Even if CDN servers accepted such large requests, the overhead of
+sending the data would terribly affect performance.</p>
+<p>A nasty thing is that a malicious site does not need to target a
+single CDN, the site can use iframes to include cookie setting HTML
+from multiple CDNs and prevent a visitor from accessing considerable
+part of the Internet. Note that this is not a DoS on CDN
+infrastructure, for which 0.5MB requests should be insignificant.</p>
+<div class="section" id="cdn-level-protection">
+<h2>CDN level protection</h2>
+<p>To protect Firefox, Chrome and Opera users CDN providers should make
+sure a domain that is shared by their clients is on the Public Suffix
+List. If a CDN provider uses <span class="docutils literal"><span class="pre">bucket.common-domain.xyz</span></span> naming scheme
+(like for example <span class="docutils literal"><span class="pre">foo.rackcdn.com</span></span>), <span class="docutils literal"><span class="pre">common-domain.xyz</span></span> should be a
+public suffix. For more elaborate schemes, such as
+<span class="docutils literal"><span class="pre">bucket.something.common-domain.xyz</span></span> (for example: <span class="docutils literal"><span class="pre">a248.e.akamai.net</span></span>),
+<span class="docutils literal"><span class="pre">*.common-domain.xyz</span></span> should be a public suffix.</p>
+<p>IE does not use the list, but IE limits combined size of cookies to
+only 10KB, CDN servers could be configured to accept such
+requests. The attack would still add a significant overhead to each
+request, but at least the requests were served. Hopefully, with issues
+like this exposed, IE will switch to the Public Suffix List at some
+point.</p>
+</div>
+<div class="section" id="web-site-level-protection">
+<h2>Web site level protection</h2>
+<p>The only things a web site that depends on a CDN can do to ensure the
+CDN hosted content can be accessed by users is to either choose a CDN
+that supports custom domains, choose a CDN that is on the Public
+Suffix List, or ask a CDN provider to add a shared domain to the
+list. A custom domain can be problematic if the site wants to retrieve
+content from CDN over HTTPS (a wise thing to do). While CDN services
+are cheap today, CDN services with custom domains and HTTPS are quite
+expensive.</p>
+</div>
+<div class="section" id="browser-level-protection">
+<h2>Browser level protection</h2>
+<p>To efficiently prevent the attack, users would need to configure
+browsers to by default reject all cookies and allow only white-listed
+sites to set cookies. <a class="reference external" href="https://addons.mozilla.org/en-US/firefox/addon/cookie-monster/?src=api">There are extensions</a>
+that allow to do it quite conveniently. Similarly rejecting by default
+all JavaScript and white-listing only trusted sites fully prevents
+the attack.</p>
+<p>Disabling third party cookies mitigates the problem. While a malicious
+site can still set a cookie bomb, it now needs to be visited directly
+(not iframed), and it can target only a single CDN at once. <a class="reference external" href="http://webpolicy.org/2013/02/22/the-new-firefox-cookie-policy/">The new
+Firefox cookie policy</a>, to
+be introduced in the release 22, should have the same effect.</p>
+</div>
+<div class="section" id="affected-cdns">
+<h2>Affected CDNs</h2>
+<p>All CDN providers that use a shared domain that is not on the Public
+Suffix List are affected. This is a long list, I’ve directly contacted
+four of them:</p>
+<p>Amazon confirmed the problem and added CloudFront and S3 domains to
+the Public Suffix List.</p>
+<p>RackSpace and Akamai did not respond.</p>
+<p>Google did not confirm the issue with CloudStorage. Google deploys a
+JavaScript based protection mechanism that can work in some limited
+cases, but it my tests it never efficiently protected CloudStorage.</p>
+<p>When Google server receives a requests with headers that are too
+large, it responds with HTTP error code 413 and an HTML with a
+script that should drop the offending cookies (white spaces added
+by me):</p>
+<div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="nx">location</span><span class="p">.</span><span class="nx">hostname</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/(^|\.)(google|blogger|orkut|youtube)\.com$/</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">var</span><span class="w"> </span><span class="nx">purePath</span><span class="o">=</span><span class="nx">location</span><span class="p">.</span><span class="nx">pathname</span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="sr">/\/[^\/]*$/</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="kd">var</span><span class="w"> </span><span class="nx">cookieSet</span><span class="o">=</span><span class="nb">document</span><span class="p">.</span><span class="nx">cookie</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="s2">&quot;;&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="k">for</span><span class="p">(</span><span class="kd">var</span><span class="w"> </span><span class="nx">cookieNum</span><span class="o">=</span><span class="mf">0</span><span class="p">;</span><span class="nx">cookieNum</span><span class="o">&lt;</span><span class="nx">cookieSet</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span><span class="o">++</span><span class="nx">cookieNum</span><span class="p">){</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nx">name</span><span class="o">=</span><span class="nx">cookieSet</span><span class="p">[</span><span class="nx">cookieNum</span><span class="p">].</span><span class="nx">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">)[</span><span class="mf">0</span><span class="p">];</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nx">host</span><span class="o">=</span><span class="nx">location</span><span class="p">.</span><span class="nx">hostname</span><span class="p">;</span>
+<span class="w">    </span><span class="k">while</span><span class="p">(</span><span class="mf">1</span><span class="p">){</span>
+<span class="w">      </span><span class="kd">var</span><span class="w"> </span><span class="nx">path</span><span class="o">=</span><span class="nx">purePath</span><span class="p">;</span>
+<span class="w">      </span><span class="k">while</span><span class="p">(</span><span class="mf">1</span><span class="p">){</span>
+<span class="w">        </span><span class="nb">document</span><span class="p">.</span><span class="nx">cookie</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">name</span><span class="o">+</span><span class="s2">&quot;=;path=&quot;</span><span class="o">+</span><span class="nx">path</span><span class="o">+</span><span class="s2">&quot;/;domain=&quot;</span><span class="o">+</span><span class="nx">host</span><span class="o">+</span>
+<span class="w">          </span><span class="s2">&quot;;expires=Thu, 01-Jan-1970 00:00:01 GMT&quot;</span><span class="p">;</span>
+<span class="w">        </span><span class="kd">var</span><span class="w"> </span><span class="nx">lastSlash</span><span class="o">=</span><span class="nx">path</span><span class="p">.</span><span class="nx">lastIndexOf</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="k">if</span><span class="p">(</span><span class="nx">lastSlash</span><span class="o">==-</span><span class="mf">1</span><span class="p">)</span>
+<span class="w">          </span><span class="k">break</span><span class="p">;</span>
+<span class="w">        </span><span class="nx">path</span><span class="o">=</span><span class="nx">path</span><span class="p">.</span><span class="nx">slice</span><span class="p">(</span><span class="mf">0</span><span class="p">,</span><span class="w"> </span><span class="nx">lastSlash</span><span class="p">)</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">      </span><span class="kd">var</span><span class="w"> </span><span class="nx">firstDot</span><span class="o">=</span><span class="nx">host</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span><span class="mf">1</span><span class="p">);</span>
+<span class="w">      </span><span class="k">if</span><span class="p">(</span><span class="nx">firstDot</span><span class="o">==-</span><span class="mf">1</span><span class="p">)</span>
+<span class="w">        </span><span class="k">break</span><span class="p">;</span>
+<span class="w">      </span><span class="nx">host</span><span class="o">=</span><span class="nx">host</span><span class="p">.</span><span class="nx">slice</span><span class="p">(</span><span class="nx">firstDot</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="nx">setTimeout</span><span class="p">(</span><span class="s2">&quot;location.reload()&quot;</span><span class="p">,</span><span class="mf">1E3</span><span class="p">)</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p>This code loops through all cookies, and overwrites them with expired
+values. Because a path and a domain are parts of a cookie id, but are
+not exposed by browsers API, the cleaning code needs to cover all
+possible paths and domains (hence three loops). This works fine if the
+code is executed. The problem is that the HTTP server resets the
+connection just after returning the response, while the client is
+still sending the request. Browser does not interpret the response as
+HTTP level 413 error, but TCP level connection reset error. The
+servers would need to let clients send the complete request for the
+response to be interpreted. Another problem is that the code is
+executed in a context of <span class="docutils literal"><span class="pre">*.commondatastorage.googleapis.com</span></span> domain
+only when the browser requests an HTML from this domain directly or
+via iframe. If a browser is requesting images, scripts or css, which
+is most often the case with CDNs, cookie clearing JavaScript has no
+chances of being executed.</p>
+</div>
+<div class="section" id="other-affected-sites">
+<h2>Other affected sites</h2>
+<p>CDNs are the most interesting targets for a DoS attack like this, but
+many sites can be also targeted directly. I’ve notified GitHub and
+DropBox, both were already working on moving user generated pages to
+separate domains (now the move is completed). While this protects
+<span class="docutils literal"><span class="pre">github.com</span></span> and <span class="docutils literal"><span class="pre">dropbox.com</span></span>, a user content can still be a
+subject of DoS. Similarly it is easy to cut access to Google drive
+hosted static pages or Tumblr.</p>
+</div>
+</div>
+
+    <div class="postmeta">
+        <div class="author">
+            <span>Posted by Jan Wrobel; April 11, 2013</span>
+        </div>
+        
+        
+        </div>
+    </article><aside class="sidebar"><section><div class="widget">
+    <h1>All posts</h1>
+    <ul><li >
+            <a href="../../../2024/12/16/improving_unit_test_coverage_with_gemini.html">Improving Unit Test Coverage with Gemini</a>
+        </li><li >
+            <a href="../../../2014/08/18/shapespark.html">Shapespark</a>
+        </li><li >
+            <a href="../../../2014/01/08/wwwhisper_add_on_for_node_js.html">wwwhisper add-on for Node.js</a>
+        </li><li >
+            <a href="../../05/13/object_oriented_programming_with_closures.html">Object Oriented Programming with closures</a>
+        </li><li >
+            <a href="../24/wwwhisper_add_on_released.html">wwwhisper add-on released</a>
+        </li><li class="blog-post-current">
+            <a href="#">DoS attack on CDN users</a>
+        </li><li >
+            <a href="../10/wwwhisper_add_on_update.html">wwwhisper add-on update</a>
+        </li><li >
+            <a href="../10/underhanded_c_contest.html">Underhanded C Contest</a>
+        </li><li >
+            <a href="../../03/20/wwwhisper_heroku_add_on_update.html">wwwhisper add-on update</a>
+        </li><li >
+            <a href="../../02/10/random_walk_illustrated_with_d3.html">Random walk illustrated with D3</a>
+        </li><li >
+            <a href="../../02/06/django_db_pool_on_heroku.html">Django DB Pool on Heroku</a>
+        </li><li >
+            <a href="../../01/31/wwwhisper_heroku_add_on.html">wwwhisper Heroku add-on</a>
+        </li><li >
+            <a href="../../../2012/12/16/c___puzzle.html">C++ puzzle</a>
+        </li><li >
+            <a href="../../../2012/12/09/productivity_tip_of_the_week.html">Productivity Tip of the Week</a>
+        </li><li >
+            <a href="../../../2012/11/14/wwwhisper_on_openshift.html">wwwhisper on OpenShift</a>
+        </li><li >
+            <a href="../../../2012/11/05/sibling_domains_cookies_isolation_.html">Sibling domains cookies isolation</a>
+        </li></ul>
+</div>
+</section></aside></div> <!-- #main --></div> <!-- #main-container -->
+
+        <div class="footer-container" role="contentinfo"><footer class="wrapper">&copy; Copyright Jan Wrobel </footer></div> <!-- footer-container -->
+
+      </div> <!--! end of #container -->
+
+    <a href="/life.html"><img class="life" src="/still_life.png" alt="still life"></a>
+    </body>
+</html>

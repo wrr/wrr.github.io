@@ -1,0 +1,14 @@
+wwwhisper add-on update
+=======================
+
+The wwwhiser add-on is now in open beta. It can finally be enabled for
+any Rails or Rack based application that runs on Heroku! `Give it a
+try <https://devcenter.heroku.com/articles/wwwhisper>`_. Because
+integration with the add-on is provided via Rack middleware, the cost
+is minimal; there is no need to write any code, few lines of config do
+the job.
+
+.. author:: default
+.. categories:: none
+.. tags:: none
+.. comments::

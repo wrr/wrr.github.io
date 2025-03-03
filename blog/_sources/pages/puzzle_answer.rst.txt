@@ -1,0 +1,53 @@
+C++ puzzle answer
+=================
+
+.. highlight:: c++
+
+``x`` can change and here is how::
+
+    #include <stdio.h>
+
+    class Puzzle {
+     public:
+      Puzzle(int x_arg) : x(x_arg) {}
+
+      int get_x() const {
+        return x;
+      }
+
+      void change_x(Puzzle& r, int new_x) const {
+        r.x = new_x;
+      }
+
+     private:
+      // Disable default operator=
+      Puzzle& operator=(const Puzzle&);
+
+      int x;
+    };
+
+    int main(void) {
+      Puzzle r1(1);
+      Puzzle r2(1);
+      r1.change_x(r2, 2);
+      printf("%d\n", r2.get_x());
+      // This is also valid:
+      r1.change_x(r1, 2);
+      printf("%d\n", r1.get_x());
+      return 0;
+    }
+
+In C++ access control modifiers (``public``, ``protected``,
+``private``) work on a class level. Objects of the same class can
+access and modify private fields of each other. The ``const`` keyword
+only guarantees the object on which the const method is called won't
+change its state, it is legal to alter state of an object passed via a
+non-const argument.
+
+Not in all object oriented languages access control modifiers work on
+a class level. For example, in Ruby an object can't invoke private
+methods of other objects of the same class.
+
+
+
+

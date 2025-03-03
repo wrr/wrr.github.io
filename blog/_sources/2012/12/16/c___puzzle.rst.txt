@@ -1,0 +1,59 @@
+C++ puzzle
+==========
+
+.. highlight:: c++
+
+You have a C++ class with all methods marked ``const``, no
+``operator=`` and one private field ``x`` initialized by the
+constructor and not market ``mutable``. Can a value of ``x`` change after
+an object is created?
+
+For example, for a class below::
+
+    class Puzzle {
+     public:
+      Puzzle(int x_arg) : x(x_arg) {}
+
+      int get_x() const {
+        return x;
+      }
+
+      void someMethod1(...) const {
+       ...
+      }
+
+      SomeReturnValue someMethod2(...) const {
+       ...
+      }
+
+     private:
+      // Disable default operator=
+      Puzzle& operator=(const Puzzle&);
+
+      int x;
+    };
+
+
+Can ``x`` change and how?
+
+The code must compile with no warnings. Rule out abuses like direct
+memory writes, incorrect casts or casting away constness like::
+
+    class Puzzle {
+     public:
+      ...
+
+      void set_x(int new_x) const {
+       // This is abusive and doesn't count.
+       const_cast<Puzzle *>(this)->x = new_x;
+      }
+
+      ...
+    };
+
+See `the solution </blog/pages/puzzle_answer.html>`_.
+
+.. author:: default
+.. categories:: none
+.. tags:: none
+.. comments::

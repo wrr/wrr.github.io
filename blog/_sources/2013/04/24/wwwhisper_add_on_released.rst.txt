@@ -1,0 +1,57 @@
+wwwhisper add-on released
+=========================
+
+The `authorization add-on for Heroku
+<https://elements.heroku.com/addons/wwwhisper/>`_ is finally out of beta. A
+huge thank you to everyone who has tried the add-on during the testing
+phases!
+
+Plans and pricing
+~~~~~~~~~~~~~~~~~
+
+Three plans are currently available:
+
+- **Starter** is a free plan that allows to grant access to a
+  protected application to a single user. The plan gives an easy way
+  to try wwwhisper. It should also cover the needs of people who are
+  developing web applications alone or who would like to conveniently
+  host any privately accessible application on Heroku.
+
+- **Basic** plan allows to grant access to an application to up to ten
+  people. The plan should cover the needs of a team working together,
+  or sharing an application with clients or early adopters. It is also
+  intended for small publicly accessible sites that need to have some
+  locations protected, for example an admin web interface. The add-on
+  allows to easily restrict access to such locations and frees
+  developers from worrying about the authorization logic. It can also
+  provide protection if an available authorization mechanism has
+  security holes.
+
+- **Plus** plan supports sites with bigger traffic and allows for up
+  to 100 authorized users.
+
+Roadmap
+~~~~~~~
+
+If you have any feedback about available features or pricing please
+send an email to `wwwhisper-service@mixedbit.org
+<mailto:wwwhisper-service@mixedbit.org>`_. This will help greatly to
+prioritize a todo list. Currently following items
+are considered:
+
+- Authorization middleware for more frameworks (node.js, wsgi, ...).
+
+- An option to set custom texts on a sign-in page.
+
+- Improvements to the admin web interface to conveniently manage 100+
+  users.
+
+- A plugin for a ``heroku`` command line tool to perform wwwhisper
+  admin operations (grant, revoke access).
+
+- Allow to use the service outside of the Heroku platform.
+
+.. author:: default
+.. categories:: none
+.. tags:: none
+.. comments::

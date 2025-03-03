@@ -1,0 +1,29 @@
+Shapespark
+==========
+
+`Shapespark <https://www.shapespark.com>`_ is a company that my
+friend Wojtek and I have started, and it has been the center of our attention
+during the last couple of months.
+
+Our goal is to build a tool for professional architects and interior
+designers to create WebGL-based real-time interactive
+visualizations. We focus on the quality of visualizations, utilizing
+physically-based rendering techniques to calculate lighting, which is
+crucial for giving 3D scenes a sense of realism. We are also
+experimenting with Oculus Rift, which turns out to be a quite useful
+tool for presenting architectural designs.
+
+Our `first visualization
+<https://demo.shapespark.com/old-brewery/>`_
+has already received compliments from many WebGL enthusiasts, including `Mr.doob
+<https://twitter.com/mrdoob/status/498873126055608320>`_, the famous
+author of the Three.js library :D.
+
+Overall, this is a very interesting venture, with so many new areas to
+explore. You can expect more WebGL-related content and demos on this
+blog, although we will probably start a Shapespark blog at some point.
+
+.. author:: default
+.. categories:: none
+.. tags:: none
+.. comments::

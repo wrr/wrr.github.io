@@ -1,0 +1,12 @@
+wwwhisper add-on update
+=======================
+
+The wwwhiser Heroku add-on is now in a private beta phase. The `official
+documentation <https://devcenter.heroku.com/articles/wwwhisper>`_ is on
+Heroku. In this phase only Heroku beta users can officially sign up,
+but if you are interested in trying, drop me an email.
+
+.. author:: default
+.. categories:: none
+.. tags:: none
+.. comments::

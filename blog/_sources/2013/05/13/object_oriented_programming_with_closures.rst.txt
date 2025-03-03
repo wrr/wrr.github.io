@@ -1,0 +1,203 @@
+Object Oriented Programming with closures
+=========================================
+
+I've been recently watching `Structure and Interpretation of Computer
+Programs
+<https://ocw.mit.edu/courses/6-001-structure-and-interpretation-of-computer-programs-spring-2005/video_galleries/video-lectures/>`_.
+These are great lectures that I highly recommend to everyone
+interested in programming. Some people can be discouraged by the use
+of Scheme, don't be. Scheme is a tiny language, very easy to pickup
+and follow, and many techniques from the lectures are applicable to
+today's mainstream languages.
+
+One interesting idea is that closures are enough to implement an
+object-oriented system. A simple example is a counter object. In
+JavaScript it can be implemented like this:
+
+.. code-block:: js
+
+      function counter() {
+        var val = 0;
+        function get() {
+          return val;
+        }
+        function inc() {
+          val += 1;
+        }
+        return [get, inc];
+      }
+
+      function get_count(counter) {
+        return counter[0]();
+      }
+
+      function inc_count(counter) {
+        counter[1]();
+      }
+
+      var counter = counter();
+      inc_count(counter);
+      inc_count(counter);
+      console.log(get_count(counter)); // prints 2
+
+A statefull counter exposes a public interface for
+increasing and obtaining a current count. The internals are
+encapsulated, you can not reset or decrease the count, because such
+operations are not exposed by the API.
+
+You can easily define your own version of the counter, and use
+it in any place where the counter is expected:
+
+.. code-block:: js
+
+      function fast_counter() {
+        var val = 0;
+        function get() {
+          return val;
+        }
+        function inc() {
+          val += 2;
+        }
+        return [get, inc];
+      }
+
+The implementation above makes one shortcut: a JavaScript built-in
+Array object is used to store and dispatch counter's internal
+methods. This is convenient, but not necessary. The lectures show that
+closures are enough to implement data structures without a need for
+any built-in complex data types ('out of thin air' as lecturers call
+it). The trick is stunning and really worth studying. First we need a
+function that creates a pair:
+
+.. code-block:: js
+
+  function pair(first, second) { // In Lisp called `cons`
+    function set_first(value) {
+      first = value;
+    }
+    function set_second(value) {
+      second = value;
+    }
+    return function(handler) {
+      return handler(first, second, set_first, set_second);
+    };
+  }
+
+A pair returned by the function is not data, but code: a closure. The
+closure needs to be invoked with a function as an argument, and it
+gives this function permissions to access and modify the values stored
+in the pair.
+
+Here is how the first element of the pair can be extracted:
+
+.. code-block:: js
+
+  function first(pair) { // aka car
+    return pair(function(first, second, set_first, set_second) {
+      return first;
+    });
+  }
+
+first() invokes a pair() and passes a function to it. The function is
+then invoked by the pair with its two current values and two functions
+to change the current values. first() cares only about the value of
+the first element and ignores remaining arguments.
+
+Below are three more analogous functions to operate on the pair:
+
+.. code-block:: js
+
+  function second(pair) { // aka cdr
+    return pair(function(first, second, set_first, set_second) {
+      return second;
+    });
+  }
+
+  function set_first(pair, value) { // aka set-car!
+    return pair(function(first, second, set_first, set_second) {
+      set_first(value);
+    });
+  }
+
+  function set_second(pair, value) { // aka set-cdr!
+    return pair(function(first, second, set_first, set_second) {
+      set_second(value);
+    });
+  }
+
+The internals are hairy, but resulting high level interface is simple:
+
+.. code-block:: js
+
+  var p = pair(3, 4);
+  console.log(first(p) + " : " + second(p));
+  set_first(p, 5);
+  console.log(first(p) + " : " + second(p));
+
+And pairs are enough to build a list:
+
+.. code-block:: js
+
+  var l = pair(3, pair(4, pair(5, null)));
+
+
+Of course, a higher level interface can be defined, this time very
+straight-forward:
+
+.. code-block:: js
+
+  function list() {
+    return null;
+  }
+
+  function is_empty(list) {
+    return list === null;
+  }
+
+  function last(list) {
+    if (is_empty(list) || second(list) === null) {
+      return list;
+    }
+    return last(second(list));
+  }
+
+  function length(list) {
+    if (is_empty(list)) {
+      return 0;
+    }
+    return 1 + length(second(list));
+  }
+
+  function append(list, value) {
+    if (is_empty(list)) {
+      return pair(value, null);
+    }
+    set_second(last(list), pair(value, null));
+    return list;
+  }
+
+  function get_item(list, idx) {
+    if (idx === 0) {
+      return first(list);
+    }
+    return get_item(second(list), idx - 1);
+  }
+
+  var l = list();
+  console.log(is_empty(l));
+  l = append(l, 1);
+  l = append(l, 2);
+  l = append(l, 3);
+  console.log(is_empty(l));
+  console.log(get_item(l, 1));
+  console.log(length(l));
+
+This is just an exercise, even in Lisp pairs (cons cells) are unlikely
+to be implemented this way. But it is interesting to see how powerful
+closures are, and how they allow to blur the distinction between code
+and data.
+
+.. author:: default
+.. categories:: none
+.. tags:: none
+.. comments::

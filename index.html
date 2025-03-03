@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+  <head>
+    <meta name="viewport" content="width=device-width">
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css"
+          href="/blog/_static/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <link rel="shortcut icon" href="icon.png">
+
+    <meta content="Jan Wróbel" name="Author">
+    <meta content="Jan Wróbel's home page and open source projects"
+          name="Description">
+
+    <title>Jan Wróbel's home page</title>
+  </head>
+
+  <body>
+    <div class="content">
+      <div class="menu">
+        <span class="menu-item selected">
+          <a href="/">Projects</a></span>
+        <span class="menu-spacer"></span>
+        <span class="menu-item">
+          <a href="/blog/">Blog</a></span>
+        <span class="menu-spacer"></span>
+        <span class="menu-item">
+          <a href="/about.html">About</a></span>
+        <span class="menu-item menu-item-rss">
+          <span class="rss">
+            <a href="/blog/rss.html" title="Subscribe via RSS"><span class="fa fa-lg fa-rss"></span></a>
+          </span>
+        </span>
+      </div>
+
+      <div class="project">
+        <h1>Shapespark</h1>
+
+        <p class="project-desc"><a href="https://www.shapespark.com">Shapespark</a>
+        is a company founded by my friend Wojtek Matyjewicz and me in
+        2014. It provides software for creating web-based interactive
+        3D spaces.  Shapespark is used mostly for real estate
+        visualizations, virtual showrooms, and virtual art
+        galleries. Shapespark was acquired in 2018 and I have left the
+        company in 2023. Today Shapespark is a top choice for
+        web-based architecture visualization.
+        </p>
+      </div>
+
+      <div class="project">
+        <h1>wwwhisper: access control for Heroku hosted apps</h1>
+        <p class="project-desc">
+          <a href="https://elements.heroku.com/addons/wwwhisper">wwwhisper</a>
+          is a language and framework-independent authorization add-on
+          for web applications hosted on Heroku. It verifies email
+          addresses of visitors with passwordless tokens and ensures
+          that only owners of allowed emails can access the site.
+        </p>
+      </div>
+
+      <div class="project">
+        <h1>Reflection Scan</h1>
+        <p class="project-desc">
+          <a href="reflection_scan/reflection_scan.pdf">A paper</a>
+          and <a href="https://github.com/wrr/reflection_scan">a
+            proof of concept</a> that introduces a timing off-path
+          attack on TCP. The attack exploits a shared routing queue
+          to disclose TCP session secrets: an ephemeral port and
+          sequence numbers used by two sides of a TCP connection.
+        </p>
+      </div>
+
+      <!-- <div class="project">
+        <h1>Speechless</h1>
+        <p class="project-desc">
+          <a href="https://play.google.com/store/apps/details?id=mixedbit.speechless">
+            A one day hack</a> based on Speech Trainer. The application
+          replays everything you say with a short delay,
+          which momentarily confuses the brain and disturbs
+          speech. 'Great...when it is working' to cite one
+          of happy users.
+        </p>
+      </div> -->
+
+      <div class="project">
+        <h1>Firekeeper</h1>
+        <p class="project-desc">
+          <a href="https://web.archive.org/web/20200113092924/http://firekeeper.mozdev.org/">Firekeeper</a>
+            was a Firefox add-on that provided Intrusion Detection
+            System capabilities. The add-on scanned the browser requests and
+            responses for traffic that matched known attack signatures
+            and alerted the user of detected attack
+            attempts. Firekeeper used rules in a
+            <a href="https://snort.org/">Snort-compatible</a>
+            format. Because the scanning was done in a browser,
+            Firekeeper was able to access and scan unencrypted HTTPS
+            traffic. I had the privilege of being mentored by Len
+            Sassaman and Meredith L. Patterson while working on
+            Firekeeper during the Google Summer of Code. The project
+            is no longer maintained.
+        </p>
+      </div>
+
+      <div class="project">
+        <h1>Intercepting HTTP traffic in Firefox</h1>
+        <p class="project-desc">
+          <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=430155">nsITraceableChannel</a>
+          is a Firefox API that I co-authored while working on
+          Firekeeper. At that time, Firefox did not provide a reliable
+          way for add-ons to intercept browser traffic. Firekeeper and
+          Firebug (which was than the top tool used by web developers)
+          needed to resort to dirty hacks to provide HTTP
+          request/response inspection functions. Jan Odvarko's from
+          Firebug <a href="http://www.softwareishard.com/blog/firebug/nsitraceablechannel-intercept-http-traffic/">explains
+          the API</a> in more detail.
+        </p>
+      </div>
+
+      <div class="project">
+        <h1>Speech Trainer</h1>
+        <p class="project-desc">
+          <a href="https://f-droid.org/en/packages/mixedbit.speechtrainer/">
+            A recording application</a> for Android specialized in
+          quickly recording and playing back words, sentences, or
+          musical phrases. The application automatically terminates
+          recording and plays recorded samples when a short period of
+          silence is detected. The source code is
+          on <a href="https://github.com/wrr/speech_trainer">GitHub</a>.
+        </p>
+      </div>
+
+      <!-- <div class="project">
+        <h1>HTTP referer and phishing</h1>
+        <p class="project-desc">
+          HTTP referer passes sensitive information to
+          untrusted parties, the information can be used to make
+          malicious content <a href="referer.html">seem trustworthy</a>.
+        </p>
+      </div> -->
+
+      <div class="project">
+        <h1>Out of Kernel File System</h1>
+        <p class="project-desc">
+          An experimental virtual file system for Linux that works
+          entirely at the user level and does not require any kernel
+          patch or module. The source code and documentation are
+          on <a href="https://github.com/wrr/okfs/"> GitHub</a>.
+        </p>
+      </div>
+
+      <!-- <div class="project">
+        <h1>Mingetty autorelogin</h1>
+        <p class="project-desc">
+          A mingetty productivity enhancing patch for dinosaurs that
+          still work in a plain text mode. It allows to
+          automatically log in with a name of a user that is already
+          logged on some other virtual console. The feature is
+          currently used by about 0 users, but the number grows
+          exponentially.
+          See <a href="mingetty-1.06-autorelogin.tar.gz">patched
+            version</a>, original is
+          on
+          <a href="http://sourceforge.net/projects/mingetty">sourceforge</a>.
+        </p>
+      </div> -->
+      <!-- https://raw.githack.com/mrdoob/three.js/r131/examples/webgl_materials_parallaxmap.html -->
+      <!-- end of content -->
+    </div>
+    <a href="life.html"><img class="life" src="still_life.png" alt="still life"></a>
+  </body>
+</html>

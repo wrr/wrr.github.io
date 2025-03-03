@@ -1,0 +1,38 @@
+body {
+  width: 100%;
+  max-width: 100%;
+  margin-left: 0px;
+  margin-right: 0px;
+  background: white;
+}
+
+details > summary {
+  cursor: pointer;
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 0.5em;
+}
+.gemini pre {
+  border-left: 4px solid #84B067;
+  padding-left: 20px;
+}
+.gemini > summary::-webkit-details-marker {
+  color: #84B067;
+}
+.gemini > summary::marker {
+  color: #84B067;
+}
+.user pre {
+  border-left: 4px double #6784B0;
+  padding-left: 20px;
+}
+.user > summary::-webkit-details-marker {
+  color: #6784B0;
+}
+.user > summary::marker {
+  color: #6784B0;
+}
+pre {
+  padding-top: 1em;
+  padding-bottom: 1em;
+}

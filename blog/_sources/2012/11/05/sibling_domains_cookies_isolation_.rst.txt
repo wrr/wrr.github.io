@@ -1,0 +1,182 @@
+Sibling domains cookies isolation
+=================================
+
+.. highlight:: bash
+
+Recently I've spent some time studying the topic of cookies isolation
+for sibling domains. Relevant information is scattered through various
+resources, as a result, the issue is often misunderstood.
+
+Sibling domains are subdomains that share a common suffix which is not
+a public suffix. For example, ``foo.example.com`` and
+``evil.example.com`` are sibling domains, because ``example.com`` is
+not a public suffix; ``foo.co.uk`` and ``evil.co.uk`` are not sibling
+domains because ``co.uk`` is a public suffix. Mozilla maintains `a
+list <https://publicsuffix.org>`_ of public suffixes that is used by
+Firefox, Chrome and Opera. IE has its own list.
+
+Browsers implement weaker isolation policy for sibling domains than
+for completely separate domains: a site can set cookies for its
+siblings.
+
+Cookie domain attribute
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Usually sites set cookies without a domain attribute. If ``foo.example.com``
+returns an HTTP header::
+
+    Set-Cookie: sid=abc; Expires=Wed, 13-Jan-2021 22:23:01 GMT;
+
+it sets a cookie that is scoped to ``foo.example.com``
+(``*.foo.example.com`` in case of Internet Explorer) and does not
+affect sibling sites. But browsers allow cookies to have the domain
+attribute set to a suffix of a domain name (providing it is not a
+public suffix)::
+
+    Set-Cookie: sid=abc; Domain=.example.com; Expires=Wed, 13-Jan-2021 22:23:01 GMT;
+
+Such cookie is scoped to all ``*.example.com`` sites. The domain
+attribute is not sent back with requests. If a cookie has an
+acceptable value, ``foo.example.com`` has no way to tell that it was set
+by a sibling site.
+
+It is important to understand security consequences of this
+policy. The isolation between siblings is not completely broken,
+``evil.example.com`` can not access DOM or read cookies that belong to
+``foo.example.com``. It can only set its own cookies that are then sent to
+``foo.example.com``.
+
+
+Why subdomains?
+~~~~~~~~~~~~~~~
+
+Often subdomains are used by a single organization that controls all
+sibling sites. In such case danger is limited, because all sites are
+trusted. The sibling domains isolation policy was likely introduced to make
+life of such organizations easier. You can have
+``login.your-company.com``, that sets a session cookie for all
+``*.you-company.com`` sites.
+
+The problem arises when sibling domains are given to different, not
+necessarily trusted organizations. If a site that was given a subdomain
+can supply its own server-side or JavaScript code, it can set cookies
+for sibling sites that belong to others.
+
+Professional sites almost always use dedicated domains. A dedicated
+domain is reasonably cheap and easy to setup, although still quite
+difficult for less tech-savvy people. Probably the biggest benefit of
+subdomains are shared SSL certificates. Certificates infrastructure
+was designed for online businesses and is way too hard to use for
+amateur sites. Yet, we store more and more sensitive things online
+that deserve a proper cryptographic protection. Having a subdomain
+from a provider that offers a shared SSL certificate is today the
+easiest way to have encrypted HTTP connections to the server.
+
+
+Exploiting weaker isolation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The simplest trick, but usually of negligible impact, is for
+``evil.example.com`` to set a cookie with a domain
+``.example.com`` that has a name recognized by ``foo.example.com`` but
+an incorrect value. In case of session cookies this can cause
+``foo.example.com`` user to be logged out - a minor annoyance.
+
+A more serious attack can be executed against a site that uses not
+signed cookies as a storage space for user settings. Such cookies can
+be replaced by the evil sibling. For example::
+
+    Set-Cookie: MyTheme=BarbiePink; Domain=.example.com; Expires=Wed, 13-Jan-2021 22:23:01 GMT;
+
+This can be easily avoided by either signing cookies with a server key
+or storing all setting on the server.
+
+The truly dangerous attack is an equivalent of `Login Cross Site
+Request Forgery
+<https://en.wikipedia.org/wiki/Cross-site_request_forgery#Forging_login_requests>`_. If
+``evil.example.com`` obtained a legitimate session cookie for
+``foo.example.com``, it can set this cookie for some user of
+``foo.example.com`` that visited ``evil.example.com``, thus logging
+the user as someone else. As with the login CSRF, the impact of the
+attack depends on the nature of the site. For nonsensitive sites such
+as forums, wikis, blogs, the impact is minor, the user will be posting
+as someone else. For sites that store sensitive information such as
+online shops that store credit card numbers or a web search that
+stores private queries history, the successful attack can be fatal. The
+sensitive data can become exposed to the attacker.
+
+Pseudo-protection
+~~~~~~~~~~~~~~~~~
+
+There is no elegant and reliable way for a sibling site to protect
+against the attack. Legacy `RFC 2109
+<https://tools.ietf.org/html/rfc2109>`_ required browsers to send the
+domain attribute back to the server. This was a great idea that would
+enable web applications to distinguish cookies set by siblings.
+Unfortunately, it was never implemented.
+
+A seemingly appealing solution, that could be employed in some
+scenarios, would be to configure a trusted reverse proxy that talks to
+all ``*.example.com`` sites to drop responses that try to set cookies with
+the domain attribute set to ``.example.com``. This doesn't work, because
+cookies can be also set from JavaScript.
+
+Another idea is for ``foo.example.com`` to overwrite cookies that were set
+with domain ``.example.com``.  Unfortunately, returning::
+
+    Set-Cookie: sid=xyz; Domain=.example.com; Expires=Wed, 13-Jan-1990 22:23:01 GMT;
+
+won't do the job, because cookies are uniquely identified by a name,
+a domain and a path. So if ``evil.example.com`` sets a cookie::
+
+    Set-Cookie: sid=SomeValidSid; Domain=.example.com; Path=/auth; Expires=Wed, 13-Jan-2021 22:23:01 GMT;
+
+``foo.example.com`` needs to overwrite it with::
+
+    Set-Cookie: sid=xyz; Domain=.example.com; Path=/auth; Expires=Wed, 13-Jan-1990 22:23:01 GMT;
+
+This means that with each response cookies returned by the server
+would need to cover all meaningful paths that the server uses. Very
+ugly and very impractical. The technique would still not fully prevent
+the attack, it would only make it more difficult. The sibling could still set
+cookies that would be included in some requests and then dropped.
+
+
+Protection
+~~~~~~~~~~
+
+An elegant solution, and the only that truly works today, is to
+request the top domain (``example.com``) to be added to the Public
+Suffix List maintained by Mozilla. Sites can not set cookies scoped to
+a domain name that is on the list. Many popular services that give
+subdomains to users are on the list (Google App Engine, Opera Unite,
+Red Hat OpenShift, DynDns). Adding a domain to the list is simple,
+there is no heavyweight process guarding it. Unfortunately, not all
+browsers use the list.
+
+There is an idea to store information about public suffixes in
+DNS. This seems like a place where this information really belongs and
+is much more elegant than the centralized list. Hopefully we'll see
+something like this in a future!
+
+
+References
+~~~~~~~~~~
+
+`Tangled Web <https://lcamtuf.coredump.cx/tangled/>`_ is a great book
+that deeply covers browser security.
+
+A document that accurately describes how browsers handle cookies is
+`RFC 6265 <https://tools.ietf.org/html/rfc6265>`_. Earlier RFCs were
+wishlists, never fully implemented.
+
+I've researched this topic while setting up a site on the Red Hat
+OpenShift platform. OpenShift gives HTTPS enabled subdomains to users
+(``*.rhcloud.com`` addresses). It turned out the OpenShift crew was
+not aware of the cookie isolation problem, but they fixed the problem
+and added OpenShift to the Mozilla Public Suffix List.
+
+.. author:: default
+.. categories:: none
+.. tags:: none
+.. comments::

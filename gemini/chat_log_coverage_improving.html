@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta name="viewport" content="width=device-width">
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css"
+          href="/blog/_static/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="../style.css">
+    <link rel="stylesheet" type="text/css" href="/gemini/style.css">
+    <link rel="shortcut icon" href="/icon.png">
+
+    <meta content="Jan Wróbel" name="Author">
+    <meta content="Gemini AI automatic unit test generation conversation log"
+          name="Description">
+    <title>Gemini AI automatic unit test generation conversation log</title>
+  </head>
+
+  <body>
+    <div class="content">
+      <p>
+        A log of a conversation with the Google Gemini LLM for the
+        automatic generation of Python unit tests. See
+        the <a href="/blog/2024/12/16/improving_unit_test_coverage_with_gemini.html">blog
+        post</a> for project details.
+      </p>
+
+      <details class="user">
+        <summary>System prompt</summary>
+        <pre class="prompt">
+You are a programmer working on a Python project. Your job
+is to add missing unit tests to the project. All the project files are
+attached. Study carefully the existing source files and unit tests.
+Your added tests need to match the style and naming conventions used
+in the project. Be consistent.
+
+You are interacting with a computer that will be writing to disk,
+executing and committing to git repository tests created by you.
+
+First, wait for the computer to issue the following command:
+
+###
+ADD_TEST_FOR: file_path
+TEST_COVERAGE:
+###
+
+In this command, file_path is a path of the python file to test
+relative to the project root directory. Examine carefully the source
+code of this file to understand the functionality that needs to be
+tested. Also examine the existing tests for the file (if any), add
+tests only for logic that is not already tested by the existing
+files. If a file is called foo_bar.py, the tests for such file are
+usually called test_foo_bar.py or tests_for_bar.py and are often
+placed in a separate 'tests' folder.
+
+TEST_COVERAGE: is followed by a source code of the file with each line
+prefixed with a coverage information like this:
+
+  # some function
+> def h(x):
+-     if 0:  # pragma: no cover
+-         pass
+>     if x == 1:
+!         a = 1
+>     else:
+>         a = 2
+
+'>' prefix means that the line is covered by tests.
+'!' prefix means that the line is not covered by test. Focus on these
+lines, your tests should include logic to execute them.
+Lack of prefix means that line is not executable and doesn't need to
+be covered (for example a comment or an empty line).
+ '-' prefix means that line is explicitly excluded from coverage testing
+ and doesn't need to be covered by tests.
+
+Special response "TEST_COVERAGE: WHOLE_FILE_NOT_COVERED" means
+that not a single line of the file is currently covered by unit tests.
+
+Next, you need to create a single unit test file for the requested
+file to test. Write the following command (enclosed in ### below) for
+the computer:
+
+###
+WRITE_TEST_FILE: file_path_with_name
+
+file_content
+
+END_TEST_FILE
+your_comments
+###
+
+Where:
+file_path_with_name is a path of the added test file relative to the
+project root directory. Important: all added file names (but not
+directories) must start with the test_gemini_ prefix (for example
+tests/test_gemini_quick_sort.py is correct). Do not create new tests
+directories, put tests in the already existing ones.
+
+file_content is a Python code of the test file to be added. Do not use
+any special encoding or character escaping for the Python code. Also
+do not wrap the code in any quotes and do not start it with the
+'python' prefix. All names of added TestCase classes need to have
+GeminiTest suffix (for example QuickSortGeminiTest). All added test
+methods need to have test_gemini_ prefix (for example
+test_gemini_quick_sort_empty_list). Follow the project programming
+style and PEP 8 code style recommendations.
+
+your_comments can include any description of what you are doing, what
+problems did you encounter with your tests and how do you try to solve
+them.
+
+The computer (not you) will respond with a message in the following
+format:
+
+TEST_RUN_STATUS:
+FAILURE_MESSAGE:
+TEST_COVERAGE:
+PROMPT:
+
+Where TEST_RUN_STATUS: is followed by either 'OK' if the added test
+file executed successfully or 'FAILED' in other cases.
+FAILURE_MESSAGE: is present only if the tests failed and is followed by
+the errors printed by the Python interpreter. This can include stack
+trace or syntax errors.
+TEST_COVERAGE: is followed by an updated information about the
+coverage of the tested file. It has the form already described above.
+PROMPT: is optional and can be followed by additional instructions.
+
+Please don't just add a single test function to cover all untested
+functionality. Instead, add a separate test function for each tested
+case.
+
+Examine carefully the returned values, if there are any syntax errors
+or test assertion failures, continue to modify the test file and write
+it again until there are no more errors. Not all test assertion code
+can be made to be passing. It is possible that your test will uncover
+an actual error in the program logic. In such case the unit test added
+by you will be failing. Annotate such tests with a comment and comment
+out the failing test assertion like this:
+
+# TODO: fix the program logic to make this test pass:
+# self.assertEqual([1, 2, 3], quick_sort([1, 3, 2]))
+
+FAILURE_MESSAGE result of the WRITE_TEST_FILE command must be
+inspected to ensure it does not contain any syntax errors. Continue to
+modify the test file to fix any syntax errors.
+
+Once your test file is ready, runs without any errors, with any
+assertions that are failing due to a bug in a program commented out,
+and has good, preferably 100% coverage (no lines marked with !)
+commit it using the following command (enclosed in ### below):
+
+###
+COMMIT: file_path_with_name
+commit_message
+END_COMMIT_MESSAGE
+###
+
+Where commit_message is a git commit message describing the
+change. Separate subject from body with a blank line. Start the
+subject with 'Gemini: ' prefix. Wrap lines at 72
+characters. Capitalize the subject line and each paragraph. Use the
+imperative mood in the subject line. Include information in the body
+that the test was generated automatically.
+
+Issue commands one by one, never issue more than one command in a
+single message. COMMIT command should be issued only after you have
+examined the computer response from the last WRITE_TEST_FILE command
+and the computer responded with "TEST_RUN_STATUS: OK" and most of the
+tested file lines are covered.
+
+After committing the test file, wait for instructions to create a next
+test file or to TERMINATE.
+
+Do not write any text that does not respect the communication protocol
+defined above. The computer only understands these two commands from
+you: WRITE_TEST_FILE and COMMIT. The computer will not be able to parse
+any other messages correctly and can fail if you provide other input.
+
+      </pre>
+      </details>
+
+      <details open class="user">
+        <summary>User:</summary>
+        <pre>
+ADD_TEST_FOR: algorithms/dp/num_decodings.py
+TEST_COVERAGE: > """
+> A message containing letters from A-Z is being
+> encoded to numbers using the following mapping:
+  
+> 'A' -> 1
+> 'B' -> 2
+> ...
+> 'Z' -> 26
+> Given an encoded message containing digits,
+> determine the total number of ways to decode it.
+  
+> For example,
+> Given encoded message "12",
+> it could be decoded as "AB" (1 2) or "L" (12).
+  
+> The number of ways decoding "12" is 2.
+> """
+  
+  
+> def num_decodings(enc_mes):
+>     """
+>     :type s: str
+>     :rtype: int
+>     """
+!     if not enc_mes or enc_mes[0] == "0":
+!         return 0
+!     last_char, last_two_chars = 1, 1
+!     for i in range(1, len(enc_mes)):
+!         last = last_char if enc_mes[i] != "0" else 0
+!         last_two = last_two_chars if int(enc_mes[i-1:i+1]) < 27 and enc_mes[i-1] != "0" else 0
+!         last_two_chars = last_char
+!         last_char = last+last_two
+!     return last_char
+  
+  
+> def num_decodings2(enc_mes):
+>     """
+>     :type s: str
+>     :rtype: int
+>     """
+!     if not enc_mes or enc_mes.startswith('0'):
+!         return 0
+!     stack = [1, 1]
+!     for i in range(1, len(enc_mes)):
+!         if enc_mes[i] == '0':
+!             if enc_mes[i-1] == '0' or enc_mes[i-1] > '2':
+                  # only '10', '20' is valid
+!                 return 0
+!             stack.append(stack[-2])
+!         elif 9 < int(enc_mes[i-1:i+1]) < 27:
+              # '01 - 09' is not allowed
+!             stack.append(stack[-2]+stack[-1])
+!         else:
+              # other case '01, 09, 27'
+!             stack.append(stack[-1])
+!     return stack[-1]</pre></details>
+      <details open class="gemini">
+        <summary>Gemini:</summary>
+        <pre>
+WRITE_TEST_FILE: tests/test_gemini_num_decodings.py
+
+import unittest
+from algorithms.dp.num_decodings import num_decodings, num_decodings2
+
+
+class NumDecodingsGeminiTest(unittest.TestCase):
+    def test_gemini_num_decodings_empty(self):
+        self.assertEqual(0, num_decodings(""))
+        self.assertEqual(0, num_decodings2(""))
+
+    def test_gemini_num_decodings_single_digit(self):
+        self.assertEqual(1, num_decodings("1"))
+        self.assertEqual(1, num_decodings2("1"))
+
+    def test_gemini_num_decodings_two_digits(self):
+        self.assertEqual(2, num_decodings("12"))
+        self.assertEqual(2, num_decodings2("12"))
+
+    def test_gemini_num_decodings_three_digits(self):
+        self.assertEqual(3, num_decodings("123"))
+        self.assertEqual(3, num_decodings2("123"))
+
+    def test_gemini_num_decodings_leading_zero(self):
+        self.assertEqual(0, num_decodings("01"))
+        self.assertEqual(0, num_decodings2("01"))
+
+    def test_gemini_num_decodings_double_zero(self):
+        self.assertEqual(0, num_decodings("100"))
+        self.assertEqual(0, num_decodings2("100"))
+
+    def test_gemini_num_decodings_invalid_two_digits(self):
+        self.assertEqual(0, num_decodings("30"))
+        self.assertEqual(0, num_decodings2("30"))
+
+END_TEST_FILE
+Added tests for num_decodings and num_decodings2 functions.</pre></details>
+      <details open class="user">
+        <summary>User:</summary>
+        <pre>
+TEST_RUN_STATUS: OK
+TEST_COVERAGE:
+> """
+> A message containing letters from A-Z is being
+> encoded to numbers using the following mapping:
+  
+> 'A' -> 1
+> 'B' -> 2
+> ...
+> 'Z' -> 26
+> Given an encoded message containing digits,
+> determine the total number of ways to decode it.
+  
+> For example,
+> Given encoded message "12",
+> it could be decoded as "AB" (1 2) or "L" (12).
+  
+> The number of ways decoding "12" is 2.
+> """
+  
+  
+> def num_decodings(enc_mes):
+>     """
+>     :type s: str
+>     :rtype: int
+>     """
+>     if not enc_mes or enc_mes[0] == "0":
+>         return 0
+>     last_char, last_two_chars = 1, 1
+>     for i in range(1, len(enc_mes)):
+>         last = last_char if enc_mes[i] != "0" else 0
+>         last_two = last_two_chars if int(enc_mes[i-1:i+1]) < 27 and enc_mes[i-1] != "0" else 0
+>         last_two_chars = last_char
+>         last_char = last+last_two
+>     return last_char
+  
+  
+> def num_decodings2(enc_mes):
+>     """
+>     :type s: str
+>     :rtype: int
+>     """
+>     if not enc_mes or enc_mes.startswith('0'):
+>         return 0
+>     stack = [1, 1]
+>     for i in range(1, len(enc_mes)):
+>         if enc_mes[i] == '0':
+>             if enc_mes[i-1] == '0' or enc_mes[i-1] > '2':
+                  # only '10', '20' is valid
+>                 return 0
+>             stack.append(stack[-2])
+>         elif 9 < int(enc_mes[i-1:i+1]) < 27:
+              # '01 - 09' is not allowed
+>             stack.append(stack[-2]+stack[-1])
+!         else:
+              # other case '01, 09, 27'
+!             stack.append(stack[-1])
+>     return stack[-1]</pre></details>
+      <details open class="gemini">
+        <summary>Gemini:</summary>
+        <pre>
+WRITE_TEST_FILE: tests/test_gemini_num_decodings.py
+
+import unittest
+from algorithms.dp.num_decodings import num_decodings, num_decodings2
+
+
+class NumDecodingsGeminiTest(unittest.TestCase):
+    def test_gemini_num_decodings_empty(self):
+        self.assertEqual(0, num_decodings(""))
+        self.assertEqual(0, num_decodings2(""))
+
+    def test_gemini_num_decodings_single_digit(self):
+        self.assertEqual(1, num_decodings("1"))
+        self.assertEqual(1, num_decodings2("1"))
+
+    def test_gemini_num_decodings_two_digits(self):
+        self.assertEqual(2, num_decodings("12"))
+        self.assertEqual(2, num_decodings2("12"))
+
+    def test_gemini_num_decodings_three_digits(self):
+        self.assertEqual(3, num_decodings("123"))
+        self.assertEqual(3, num_decodings2("123"))
+
+    def test_gemini_num_decodings_leading_zero(self):
+        self.assertEqual(0, num_decodings("01"))
+        self.assertEqual(0, num_decodings2("01"))
+
+    def test_gemini_num_decodings_double_zero(self):
+        self.assertEqual(0, num_decodings("100"))
+        self.assertEqual(0, num_decodings2("100"))
+
+    def test_gemini_num_decodings_invalid_two_digits(self):
+        self.assertEqual(0, num_decodings("30"))
+        self.assertEqual(0, num_decodings2("30"))
+
+    def test_gemini_num_decodings_other_case(self):
+        self.assertEqual(1, num_decodings("27"))
+        self.assertEqual(1, num_decodings2("27"))
+
+END_TEST_FILE
+Added test for the 'other case' in num_decodings2 function.</pre></details>
+      <details open class="user">
+        <summary>User:</summary>
+        <pre>
+TEST_RUN_STATUS: OK
+TEST_COVERAGE:
+> """
+> A message containing letters from A-Z is being
+> encoded to numbers using the following mapping:
+  
+> 'A' -> 1
+> 'B' -> 2
+> ...
+> 'Z' -> 26
+> Given an encoded message containing digits,
+> determine the total number of ways to decode it.
+  
+> For example,
+> Given encoded message "12",
+> it could be decoded as "AB" (1 2) or "L" (12).
+  
+> The number of ways decoding "12" is 2.
+> """
+  
+  
+> def num_decodings(enc_mes):
+>     """
+>     :type s: str
+>     :rtype: int
+>     """
+>     if not enc_mes or enc_mes[0] == "0":
+>         return 0
+>     last_char, last_two_chars = 1, 1
+>     for i in range(1, len(enc_mes)):
+>         last = last_char if enc_mes[i] != "0" else 0
+>         last_two = last_two_chars if int(enc_mes[i-1:i+1]) < 27 and enc_mes[i-1] != "0" else 0
+>         last_two_chars = last_char
+>         last_char = last+last_two
+>     return last_char
+  
+  
+> def num_decodings2(enc_mes):
+>     """
+>     :type s: str
+>     :rtype: int
+>     """
+>     if not enc_mes or enc_mes.startswith('0'):
+>         return 0
+>     stack = [1, 1]
+>     for i in range(1, len(enc_mes)):
+>         if enc_mes[i] == '0':
+>             if enc_mes[i-1] == '0' or enc_mes[i-1] > '2':
+                  # only '10', '20' is valid
+>                 return 0
+>             stack.append(stack[-2])
+>         elif 9 < int(enc_mes[i-1:i+1]) < 27:
+              # '01 - 09' is not allowed
+>             stack.append(stack[-2]+stack[-1])
+>         else:
+              # other case '01, 09, 27'
+>             stack.append(stack[-1])
+>     return stack[-1]</pre></details>
+      <details open class="gemini">
+        <summary>Gemini:</summary>
+        <pre>
+COMMIT: tests/test_gemini_num_decodings.py
+Gemini: Add Tests for Num Decodings
+
+This commit adds unit tests for the num_decodings and
+num_decodings2 functions in the
+algorithms/dp/num_decodings.py module.
+
+The tests cover cases for empty strings, single-digit
+strings, two-digit strings, three-digit strings,
+leading zeros, double zeros, invalid two-digit strings,
+and other cases.
+
+The tests were generated automatically.
+END_COMMIT_MESSAGE </pre></details>
+
+
+    </div>
+  </body>
+</html>

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+        <meta charset="utf-8">
+        <meta name="description" content="My blog">
+        <meta name="viewport" content="width=device-width">
+        <title>Page 16 &mdash; Random notes</title>
+            <link rel="stylesheet" href="_static/normalize.css" type="text/css">
+            <link rel="stylesheet" href="_static/sphinx.css" type="text/css">
+            <link rel="stylesheet" href="_static/main.css" type="text/css">
+            <link rel="stylesheet" href="_static/modern5.css" type="text/css">
+            <link rel="stylesheet" href="_static/pygments.css" type="text/css">
+            <link rel="stylesheet" href="_static/font-awesome.min.css" type="text/css">
+            <link rel="stylesheet" href="/style.css" type="text/css">
+        <link rel="shortcut icon" href="_static/life.png"><link rel="search" title="Search" href="search.html"><link rel="prev" title="Newer" href="page15.html"><link rel="alternate" type="application/rss+xml" title="RSS" href="rss.html"></head>
+    <body>
+      <div id="container" class="content"><div class="menu">
+        <span class="menu-item">
+          <a href="/">Projects</a></span>
+        <span class="menu-spacer"></span>
+        <span class="menu-item selected">
+          <a href="/blog/">Blog</a></span>
+        <span class="menu-spacer"></span>
+        <span class="menu-item">
+          <a href="/about.html">About</a></span>
+        <span class="menu-item menu-item-rss">
+            <span class="rss">
+              <a href="/blog/rss.html" title="Subscribe via RSS"><span class="fa fa-lg fa-rss"></span></a>
+            </span>
+        </span>
+      </div><div class="main-container" role="main"><div class="main wrapper body clearfix"><article>
+                    <div class="section">
+            <h1><a href="2012/11/05/sibling_domains_cookies_isolation_.html">Sibling domains cookies isolation</a></h1>
+<p>Recently I’ve spent some time studying the topic of cookies isolation
+for sibling domains. Relevant information is scattered through various
+resources, as a result, the issue is often misunderstood.</p>
+<p>Sibling domains are subdomains that share a common suffix which is not
+a public suffix. For example, <span class="docutils literal"><span class="pre">foo.example.com</span></span> and
+<span class="docutils literal"><span class="pre">evil.example.com</span></span> are sibling domains, because <span class="docutils literal"><span class="pre">example.com</span></span> is
+not a public suffix; <span class="docutils literal"><span class="pre">foo.co.uk</span></span> and <span class="docutils literal"><span class="pre">evil.co.uk</span></span> are not sibling
+domains because <span class="docutils literal"><span class="pre">co.uk</span></span> is a public suffix. Mozilla maintains <a class="reference external" href="https://publicsuffix.org">a
+list</a> of public suffixes that is used by
+Firefox, Chrome and Opera. IE has its own list.</p>
+<p>Browsers implement weaker isolation policy for sibling domains than
+for completely separate domains: a site can set cookies for its
+siblings.</p>
+<div class="section" id="cookie-domain-attribute">
+<h2>Cookie domain attribute</h2>
+<p>Usually sites set cookies without a domain attribute. If <span class="docutils literal"><span class="pre">foo.example.com</span></span>
+returns an HTTP header:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span/>Set-Cookie:<span class="w"> </span><span class="nv">sid</span><span class="o">=</span>abc<span class="p">;</span><span class="w"> </span><span class="nv">Expires</span><span class="o">=</span>Wed,<span class="w"> </span><span class="m">13</span>-Jan-2021<span class="w"> </span><span class="m">22</span>:23:01<span class="w"> </span>GMT<span class="p">;</span>
+</pre></div>
+</div>
+<p>it sets a cookie that is scoped to <span class="docutils literal"><span class="pre">foo.example.com</span></span>
+(<span class="docutils literal"><span class="pre">*.foo.example.com</span></span> in case of Internet Explorer) and does not
+affect sibling sites. But browsers allow cookies to have the domain
+attribute set to a suffix of a domain name (providing it is not a
+public suffix):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span/>Set-Cookie:<span class="w"> </span><span class="nv">sid</span><span class="o">=</span>abc<span class="p">;</span><span class="w"> </span><span class="nv">Domain</span><span class="o">=</span>.example.com<span class="p">;</span><span class="w"> </span><span class="nv">Expires</span><span class="o">=</span>Wed,<span class="w"> </span><span class="m">13</span>-Jan-2021<span class="w"> </span><span class="m">22</span>:23:01<span class="w"> </span>GMT<span class="p">;</span>
+</pre></div>
+</div>
+<p>Such cookie is scoped to all <span class="docutils literal"><span class="pre">*.example.com</span></span> sites. The domain
+attribute is not sent back with requests. If a cookie has an
+acceptable value, <span class="docutils literal"><span class="pre">foo.example.com</span></span> has no way to tell that it was set
+by a sibling site.</p>
+<p>It is important to understand security consequences of this
+policy. The isolation between siblings is not completely broken,
+<span class="docutils literal"><span class="pre">evil.example.com</span></span> can not access DOM or read cookies that belong to
+<span class="docutils literal"><span class="pre">foo.example.com</span></span>. It can only set its own cookies that are then sent to
+<span class="docutils literal"><span class="pre">foo.example.com</span></span>.</p>
+</div>
+<div class="section" id="why-subdomains">
+<h2>Why subdomains?</h2>
+<p>Often subdomains are used by a single organization that controls all
+sibling sites. In such case danger is limited, because all sites are
+trusted. The sibling domains isolation policy was likely introduced to make
+life of such organizations easier. You can have
+<span class="docutils literal"><span class="pre">login.your-company.com</span></span>, that sets a session cookie for all
+<span class="docutils literal"><span class="pre">*.you-company.com</span></span> sites.</p>
+<p>The problem arises when sibling domains are given to different, not
+necessarily trusted organizations. If a site that was given a subdomain
+can supply its own server-side or JavaScript code, it can set cookies
+for sibling sites that belong to others.</p>
+<p>Professional sites almost always use dedicated domains. A dedicated
+domain is reasonably cheap and easy to setup, although still quite
+difficult for less tech-savvy people. Probably the biggest benefit of
+subdomains are shared SSL certificates. Certificates infrastructure
+was designed for online businesses and is way too hard to use for
+amateur sites. Yet, we store more and more sensitive things online
+that deserve a proper cryptographic protection. Having a subdomain
+from a provider that offers a shared SSL certificate is today the
+easiest way to have encrypted HTTP connections to the server.</p>
+</div>
+<div class="section" id="exploiting-weaker-isolation">
+<h2>Exploiting weaker isolation</h2>
+<p>The simplest trick, but usually of negligible impact, is for
+<span class="docutils literal"><span class="pre">evil.example.com</span></span> to set a cookie with a domain
+<span class="docutils literal"><span class="pre">.example.com</span></span> that has a name recognized by <span class="docutils literal"><span class="pre">foo.example.com</span></span> but
+an incorrect value. In case of session cookies this can cause
+<span class="docutils literal"><span class="pre">foo.example.com</span></span> user to be logged out - a minor annoyance.</p>
+<p>A more serious attack can be executed against a site that uses not
+signed cookies as a storage space for user settings. Such cookies can
+be replaced by the evil sibling. For example:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span/>Set-Cookie:<span class="w"> </span><span class="nv">MyTheme</span><span class="o">=</span>BarbiePink<span class="p">;</span><span class="w"> </span><span class="nv">Domain</span><span class="o">=</span>.example.com<span class="p">;</span><span class="w"> </span><span class="nv">Expires</span><span class="o">=</span>Wed,<span class="w"> </span><span class="m">13</span>-Jan-2021<span class="w"> </span><span class="m">22</span>:23:01<span class="w"> </span>GMT<span class="p">;</span>
+</pre></div>
+</div>
+<p>This can be easily avoided by either signing cookies with a server key
+or storing all setting on the server.</p>
+<p>The truly dangerous attack is an equivalent of <a class="reference external" href="https://en.wikipedia.org/wiki/Cross-site_request_forgery#Forging_login_requests">Login Cross Site
+Request Forgery</a>. If
+<span class="docutils literal"><span class="pre">evil.example.com</span></span> obtained a legitimate session cookie for
+<span class="docutils literal"><span class="pre">foo.example.com</span></span>, it can set this cookie for some user of
+<span class="docutils literal"><span class="pre">foo.example.com</span></span> that visited <span class="docutils literal"><span class="pre">evil.example.com</span></span>, thus logging
+the user as someone else. As with the login CSRF, the impact of the
+attack depends on the nature of the site. For nonsensitive sites such
+as forums, wikis, blogs, the impact is minor, the user will be posting
+as someone else. For sites that store sensitive information such as
+online shops that store credit card numbers or a web search that
+stores private queries history, the successful attack can be fatal. The
+sensitive data can become exposed to the attacker.</p>
+</div>
+<div class="section" id="pseudo-protection">
+<h2>Pseudo-protection</h2>
+<p>There is no elegant and reliable way for a sibling site to protect
+against the attack. Legacy <a class="reference external" href="https://tools.ietf.org/html/rfc2109">RFC 2109</a> required browsers to send the
+domain attribute back to the server. This was a great idea that would
+enable web applications to distinguish cookies set by siblings.
+Unfortunately, it was never implemented.</p>
+<p>A seemingly appealing solution, that could be employed in some
+scenarios, would be to configure a trusted reverse proxy that talks to
+all <span class="docutils literal"><span class="pre">*.example.com</span></span> sites to drop responses that try to set cookies with
+the domain attribute set to <span class="docutils literal"><span class="pre">.example.com</span></span>. This doesn’t work, because
+cookies can be also set from JavaScript.</p>
+<p>Another idea is for <span class="docutils literal"><span class="pre">foo.example.com</span></span> to overwrite cookies that were set
+with domain <span class="docutils literal"><span class="pre">.example.com</span></span>.  Unfortunately, returning:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span/>Set-Cookie:<span class="w"> </span><span class="nv">sid</span><span class="o">=</span>xyz<span class="p">;</span><span class="w"> </span><span class="nv">Domain</span><span class="o">=</span>.example.com<span class="p">;</span><span class="w"> </span><span class="nv">Expires</span><span class="o">=</span>Wed,<span class="w"> </span><span class="m">13</span>-Jan-1990<span class="w"> </span><span class="m">22</span>:23:01<span class="w"> </span>GMT<span class="p">;</span>
+</pre></div>
+</div>
+<p>won’t do the job, because cookies are uniquely identified by a name,
+a domain and a path. So if <span class="docutils literal"><span class="pre">evil.example.com</span></span> sets a cookie:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span/>Set-Cookie:<span class="w"> </span><span class="nv">sid</span><span class="o">=</span>SomeValidSid<span class="p">;</span><span class="w"> </span><span class="nv">Domain</span><span class="o">=</span>.example.com<span class="p">;</span><span class="w"> </span><span class="nv">Path</span><span class="o">=</span>/auth<span class="p">;</span><span class="w"> </span><span class="nv">Expires</span><span class="o">=</span>Wed,<span class="w"> </span><span class="m">13</span>-Jan-2021<span class="w"> </span><span class="m">22</span>:23:01<span class="w"> </span>GMT<span class="p">;</span>
+</pre></div>
+</div>
+<p><span class="docutils literal"><span class="pre">foo.example.com</span></span> needs to overwrite it with:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span/>Set-Cookie:<span class="w"> </span><span class="nv">sid</span><span class="o">=</span>xyz<span class="p">;</span><span class="w"> </span><span class="nv">Domain</span><span class="o">=</span>.example.com<span class="p">;</span><span class="w"> </span><span class="nv">Path</span><span class="o">=</span>/auth<span class="p">;</span><span class="w"> </span><span class="nv">Expires</span><span class="o">=</span>Wed,<span class="w"> </span><span class="m">13</span>-Jan-1990<span class="w"> </span><span class="m">22</span>:23:01<span class="w"> </span>GMT<span class="p">;</span>
+</pre></div>
+</div>
+<p>This means that with each response cookies returned by the server
+would need to cover all meaningful paths that the server uses. Very
+ugly and very impractical. The technique would still not fully prevent
+the attack, it would only make it more difficult. The sibling could still set
+cookies that would be included in some requests and then dropped.</p>
+</div>
+<div class="section" id="protection">
+<h2>Protection</h2>
+<p>An elegant solution, and the only that truly works today, is to
+request the top domain (<span class="docutils literal"><span class="pre">example.com</span></span>) to be added to the Public
+Suffix List maintained by Mozilla. Sites can not set cookies scoped to
+a domain name that is on the list. Many popular services that give
+subdomains to users are on the list (Google App Engine, Opera Unite,
+Red Hat OpenShift, DynDns). Adding a domain to the list is simple,
+there is no heavyweight process guarding it. Unfortunately, not all
+browsers use the list.</p>
+<p>There is an idea to store information about public suffixes in
+DNS. This seems like a place where this information really belongs and
+is much more elegant than the centralized list. Hopefully we’ll see
+something like this in a future!</p>
+</div>
+<div class="section" id="references">
+<h2>References</h2>
+<p><a class="reference external" href="https://lcamtuf.coredump.cx/tangled/">Tangled Web</a> is a great book
+that deeply covers browser security.</p>
+<p>A document that accurately describes how browsers handle cookies is
+<a class="reference external" href="https://tools.ietf.org/html/rfc6265">RFC 6265</a>. Earlier RFCs were
+wishlists, never fully implemented.</p>
+<p>I’ve researched this topic while setting up a site on the Red Hat
+OpenShift platform. OpenShift gives HTTPS enabled subdomains to users
+(<span class="docutils literal"><span class="pre">*.rhcloud.com</span></span> addresses). It turned out the OpenShift crew was
+not aware of the cookie isolation problem, but they fixed the problem
+and added OpenShift to the Mozilla Public Suffix List.</p>
+</div>
+
+        </div>
+        <div class="postmeta">
+        <div class="author">
+            <span>Posted by Jan Wrobel; November 05, 2012</span>
+        </div>
+        
+        
+        </div><div class="archive_link">
+        <a href="archive.html"> &mdash; Blog Archive &mdash; </a>
+    </div></article><aside class="sidebar"><section><div class="widget">
+    <h1>All posts</h1>
+    <ul><li >
+            <a href="2024/12/16/improving_unit_test_coverage_with_gemini.html">Improving Unit Test Coverage with Gemini</a>
+        </li><li >
+            <a href="2014/08/18/shapespark.html">Shapespark</a>
+        </li><li >
+            <a href="2014/01/08/wwwhisper_add_on_for_node_js.html">wwwhisper add-on for Node.js</a>
+        </li><li >
+            <a href="2013/05/13/object_oriented_programming_with_closures.html">Object Oriented Programming with closures</a>
+        </li><li >
+            <a href="2013/04/24/wwwhisper_add_on_released.html">wwwhisper add-on released</a>
+        </li><li >
+            <a href="2013/04/11/dos_attack_on_cdn_users.html">DoS attack on CDN users</a>
+        </li><li >
+            <a href="2013/04/10/wwwhisper_add_on_update.html">wwwhisper add-on update</a>
+        </li><li >
+            <a href="2013/04/10/underhanded_c_contest.html">Underhanded C Contest</a>
+        </li><li >
+            <a href="2013/03/20/wwwhisper_heroku_add_on_update.html">wwwhisper add-on update</a>
+        </li><li >
+            <a href="2013/02/10/random_walk_illustrated_with_d3.html">Random walk illustrated with D3</a>
+        </li><li >
+            <a href="2013/02/06/django_db_pool_on_heroku.html">Django DB Pool on Heroku</a>
+        </li><li >
+            <a href="2013/01/31/wwwhisper_heroku_add_on.html">wwwhisper Heroku add-on</a>
+        </li><li >
+            <a href="2012/12/16/c___puzzle.html">C++ puzzle</a>
+        </li><li >
+            <a href="2012/12/09/productivity_tip_of_the_week.html">Productivity Tip of the Week</a>
+        </li><li >
+            <a href="2012/11/14/wwwhisper_on_openshift.html">wwwhisper on OpenShift</a>
+        </li><li >
+            <a href="2012/11/05/sibling_domains_cookies_isolation_.html">Sibling domains cookies isolation</a>
+        </li></ul>
+</div>
+</section></aside></div> <!-- #main --></div> <!-- #main-container -->
+
+        <div class="footer-container" role="contentinfo"><footer class="wrapper">&copy; Copyright Jan Wrobel </footer></div> <!-- footer-container -->
+
+      </div> <!--! end of #container -->
+
+    <a href="/life.html"><img class="life" src="/still_life.png" alt="still life"></a>
+    </body>
+</html>

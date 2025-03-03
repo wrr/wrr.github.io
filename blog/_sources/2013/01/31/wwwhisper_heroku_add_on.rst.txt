@@ -1,0 +1,23 @@
+wwwhisper Heroku add-on
+=======================
+
+I've worked recently on making `wwwhisper authorization
+<https://github.com/wrr/wwwhisper>`_ available as a service for Heroku
+applications. This greatly simplifies wwwhisper setup and
+management. You can enable wwwhisper add-on for any Ruby based
+application with just `3 lines of
+config <https://github.com/wrr/rack-wwwhisper/blob/master/heroku-doc.md>`_!
+
+Following Heroku add-on development processes, the wwwhisper add-on is
+now in alpha testing phase and needs to be successfully used by
+several users before it can move to closed beta, then open beta and
+finally be officially released.
+
+A grand plan is to offer a basic free plan and a fully-featured paid
+plan to cover the cost of infrastructure and support further
+development of wwwhisper.
+
+.. author:: default
+.. categories:: none
+.. tags:: none
+.. comments::

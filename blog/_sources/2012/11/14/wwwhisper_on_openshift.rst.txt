@@ -1,0 +1,15 @@
+wwwhisper on OpenShift
+======================
+
+.. highlight:: bash
+
+I've prepared instructions and scripts to easily setup wwwhisper
+autorized nginx on the OpenShift platform. Please visit
+`github <https://github.com/wrr/wwwhisper-openshift>`_ for more details
+and links to a demo site.
+
+
+.. author:: default
+.. categories:: none
+.. tags:: none
+.. comments::

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+        <meta charset="utf-8">
+        <meta name="description" content="My blog">
+        <meta name="viewport" content="width=device-width">
+        <title>Django DB Pool on Heroku &mdash; Random notes</title>
+            <link rel="stylesheet" href="../../../_static/normalize.css" type="text/css">
+            <link rel="stylesheet" href="../../../_static/sphinx.css" type="text/css">
+            <link rel="stylesheet" href="../../../_static/main.css" type="text/css">
+            <link rel="stylesheet" href="../../../_static/modern5.css" type="text/css">
+            <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css">
+            <link rel="stylesheet" href="../../../_static/font-awesome.min.css" type="text/css">
+            <link rel="stylesheet" href="/style.css" type="text/css">
+        <link rel="shortcut icon" href="../../../_static/life.png"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="wwwhisper Heroku add-on" href="../../01/31/wwwhisper_heroku_add_on.html"><link rel="prev" title="Random walk illustrated with D3" href="../10/random_walk_illustrated_with_d3.html"><link rel="alternate" type="application/rss+xml" title="RSS" href="../../../rss.html"></head>
+    <body>
+      <div id="container" class="content"><div class="menu">
+        <span class="menu-item">
+          <a href="/">Projects</a></span>
+        <span class="menu-spacer"></span>
+        <span class="menu-item selected">
+          <a href="/blog/">Blog</a></span>
+        <span class="menu-spacer"></span>
+        <span class="menu-item">
+          <a href="/about.html">About</a></span>
+        <span class="menu-item menu-item-rss">
+            <span class="rss">
+              <a href="/blog/rss.html" title="Subscribe via RSS"><span class="fa fa-lg fa-rss"></span></a>
+            </span>
+        </span>
+      </div><div class="main-container" role="main"><div class="main wrapper body clearfix"><article>
+                    <div class="section" id="django-db-pool-on-heroku">
+<h1>Django DB Pool on Heroku</h1>
+<p>Recently I switched my Django application that runs on Heroku to use
+production PostgreSQL database.  According to <a class="reference external" href="https://devcenter.heroku.com/articles/heroku-postgres-plans#determining-required-cachesize">the documentation</a>
+common queries to such database should take less than 10ms.
+Unfortunately, Django requests were taking about 45ms (each request
+executed a single SQL query, with no joins and a single row
+result. The row lookup was done by an indexed column, and all data fit
+in the Postgres cache).</p>
+<p>Just by enabling persistent DB connection with <a class="reference external" href="https://github.com/gmcguire/django-db-pool">Django DB Pool</a>, request processing
+time for the application was reduced to about 10ms!  An application
+that uses <span class="docutils literal"><span class="pre">dj_database_url</span></span> (recommended by Heroku), can enable the
+pool with following settings:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">DATABASES</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;default&#39;</span><span class="p">:</span> <span class="n">dj_database_url</span><span class="o">.</span><span class="n">config</span><span class="p">()}</span>
+<span class="n">DATABASES</span><span class="p">[</span><span class="s1">&#39;default&#39;</span><span class="p">][</span><span class="s1">&#39;ENGINE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;dbpool.db.backends.postgresql_psycopg2&#39;</span>
+<span class="n">DATABASES</span><span class="p">[</span><span class="s1">&#39;default&#39;</span><span class="p">][</span><span class="s1">&#39;OPTIONS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;MAX_CONNS&#39;</span><span class="p">:</span> <span class="mi">1</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<div class="section" id="background">
+<h2>Background</h2>
+<p>Django makes a separate connection to a database for each incoming
+request, this introduces a substantial (35ms in my case) per-request
+overhead for a connection establishment and authentication. In
+addition, Postgres maintains a query execution plan cache for each
+connection, if an application runs the same query for each request but
+over a different connection, benefits of the plan caching are lost,
+plans are recomputed each time.</p>
+<p>There is <a class="reference external" href="https://groups.google.com/forum/#!topic/django-users/m1jeE4Cxr9A/discussion">a long debate</a>
+about this issue in the Django community. The core team argues that
+connection management is not Django’s business and should be handled
+by an external connection pooler. I agree with this, but I also agree
+that the default and the only out-of-the-box option (close a
+connection after each request) is a bad choice. Django should keep the
+database connection open, and if this is not optimal in some setups,
+an external pooler can be used to close connections. Because Django
+closes a DB connection after each request, a pooler can only reduce an
+overhead of a pooler&lt;-&gt;db connection setup, there is still per request
+overhead of a Django&lt;-&gt;pooler connection setup, which can be cheaper,
+but is still suboptimal.</p>
+<p>Running an external pooler only to have (somehow) persistent DB
+connections is also an additional burden. Fortunately, thanks to the
+Django DB Pool, this is unnecessary, and we can have fully persistent
+connections in Django!</p>
+</div>
+</div>
+
+    <div class="postmeta">
+        <div class="author">
+            <span>Posted by Jan Wrobel; February 06, 2013</span>
+        </div>
+        
+        
+        </div>
+    </article><aside class="sidebar"><section><div class="widget">
+    <h1>All posts</h1>
+    <ul><li >
+            <a href="../../../2024/12/16/improving_unit_test_coverage_with_gemini.html">Improving Unit Test Coverage with Gemini</a>
+        </li><li >
+            <a href="../../../2014/08/18/shapespark.html">Shapespark</a>
+        </li><li >
+            <a href="../../../2014/01/08/wwwhisper_add_on_for_node_js.html">wwwhisper add-on for Node.js</a>
+        </li><li >
+            <a href="../../05/13/object_oriented_programming_with_closures.html">Object Oriented Programming with closures</a>
+        </li><li >
+            <a href="../../04/24/wwwhisper_add_on_released.html">wwwhisper add-on released</a>
+        </li><li >
+            <a href="../../04/11/dos_attack_on_cdn_users.html">DoS attack on CDN users</a>
+        </li><li >
+            <a href="../../04/10/wwwhisper_add_on_update.html">wwwhisper add-on update</a>
+        </li><li >
+            <a href="../../04/10/underhanded_c_contest.html">Underhanded C Contest</a>
+        </li><li >
+            <a href="../../03/20/wwwhisper_heroku_add_on_update.html">wwwhisper add-on update</a>
+        </li><li >
+            <a href="../10/random_walk_illustrated_with_d3.html">Random walk illustrated with D3</a>
+        </li><li class="blog-post-current">
+            <a href="#">Django DB Pool on Heroku</a>
+        </li><li >
+            <a href="../../01/31/wwwhisper_heroku_add_on.html">wwwhisper Heroku add-on</a>
+        </li><li >
+            <a href="../../../2012/12/16/c___puzzle.html">C++ puzzle</a>
+        </li><li >
+            <a href="../../../2012/12/09/productivity_tip_of_the_week.html">Productivity Tip of the Week</a>
+        </li><li >
+            <a href="../../../2012/11/14/wwwhisper_on_openshift.html">wwwhisper on OpenShift</a>
+        </li><li >
+            <a href="../../../2012/11/05/sibling_domains_cookies_isolation_.html">Sibling domains cookies isolation</a>
+        </li></ul>
+</div>
+</section></aside></div> <!-- #main --></div> <!-- #main-container -->
+
+        <div class="footer-container" role="contentinfo"><footer class="wrapper">&copy; Copyright Jan Wrobel </footer></div> <!-- footer-container -->
+
+      </div> <!--! end of #container -->
+
+    <a href="/life.html"><img class="life" src="/still_life.png" alt="still life"></a>
+    </body>
+</html>

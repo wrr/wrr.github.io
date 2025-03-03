@@ -1,0 +1,30 @@
+wwwhisper add-on for Node.js
+============================
+
+The `wwwhisper Heroku add-on
+<https://elements.heroku.com/addons/wwwhisper/>`_ is now available for
+Node.js. As with the Ruby Rails/Rack version the setup is just a
+matter of three lines of config that enable the wwwhisper auth
+middleware.
+
+One of the goals of wwwhisper is to decouple authentication and
+authorization logic from the application business logic. Such approach
+allows to easily enable auth without changing business logic at all,
+but it has also security benefits. `The Open Web Application Security
+Project summarizes it nicely
+<https://www.owasp.org/index.php/Guide_to_Authorization#Centralized_authorization_routines>`_:
+
+    'A common mistake is to perform an authorization check by cutting
+    and pasting an authorization code snippet into every page
+    containing sensitive information. Worse yet would be re-writing
+    this code for every page. Well written applications centralize
+    access control routines, so if any bugs are found, they can be
+    fixed once and the results apply throughout the application
+    immediately.'
+
+
+
+.. author:: default
+.. categories:: none
+.. tags:: none
+.. comments::

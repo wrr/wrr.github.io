@@ -1,0 +1,117 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+	  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-2" />
+<link rel="stylesheet" type="text/css" href="style.css" />
+
+<link rel="shortcut icon" href="icon.png" />
+<style>
+li {
+  padding-left: 15px;
+}
+</style>
+<title>Using HTTP referer for phishing attacks</title>
+</head>
+
+<body>
+
+<div class="content">
+<h1>Using HTTP referer for phishing attacks</h1>
+
+<p> <a href='https://en.wikipedia.org/wiki/Referer'>HTTP referer</a>
+(aka referrer) contains URL of a page from which HTTP request
+originated. The header allows websites to identify where the user is
+coming from and, in case of web search originated traffic, what
+keywords the user entered to find the destination. Referer raises
+privacy concerns, but the field is also questionable from a security
+perspective. Referer passes to untrusted sites information that can be used
+to make malicious content seem trustworthy.  Following steps describe
+how such information can be used for a generic (not targeted at any specific
+site) phishing attack: </p>
+
+<ol>
+
+<li> <p> A phisher sets up a URL rewriting reverse proxy. The proxy
+can retrieve any requested web page, but alters all URLs in the
+returned page to point to the proxy. The proxy is a generic phishing
+site, it seats in the middle between the user and legitimate websites,
+it can log all data supplied in web forms and change all HTTPS traffic to
+plain HTTP. As an alternative to the proxy, the phisher can use <a
+href="https://www.securityfocus.com/archive/1/373149">tricks with
+frames</a>.</p> </li>
+
+<li> <p> The phisher sets up a seemingly legitimate website with some
+interesting content, the site becomes indexed by search engines and
+possibly linked from other sources.  </p> </li>
+
+<li> <p> When the site is visited, it extracts URL from the referer
+field and tricks the user into thinking that he or she returned to the
+referring page (This will often be a trusted web search). In fact,
+the user is directed to the reverse proxy which intercepts all traffic
+between the user and the trusted site, and all sites that are visited
+from the trusted site.  </p> </li>
+
+</ol>
+
+<p> While intercepting web search traffic does not seem to be very
+attractive from the phishing perspective, many users <a
+href="https://www.google.com/intl/en/press/zeitgeist2010/"> use web
+search to navigate to services that require login and
+password</a>. Such data can be very lucrative.</p>
+
+<p> As in case of most phishing attacks, the browser's address bar
+correctly indicates that the user is interacting with a phishing
+site. The question is how likely is the user to check the address bar
+in the middle of what seems to be a normal web surfing session? </p>
+
+<p>Following examples demonstrate three out of many ways in which
+the user can be tricked into thinking that he or she returned to the
+original site.  The external site to which the examples redirect is
+(likely) harmless.  If you are careful, you will notice small
+differences between this site and the fake. Assume this site is
+trusted, and the linked site is not.</p>
+
+<ol>
+
+<li> <p> In <a href="https://mixedbit.com/referer/case1.php">the first
+example</a> you are presented with a malware warning and 'get me
+out of here' link. Clicking the link takes you to the fake site.  </p>
+</li>
+
+<li> <p> <a href="https://mixedbit.com/referer/case2.html">The second
+example</a> does not require any non-standard navigation actions, just
+visit a page and go back with the browser's back button. The example
+requires JavaScript and HTML5 enabled browser (Firefox 4.0, Opera
+11.50, Safari 5.0, Chrome 5).  </p> </li>
+
+<li> <p> <a href="https://mixedbit.com/referer/case3.php">The third
+example</a> is probably the most suspicious one. You are taken
+directly to the fake site. The phisher tries to fool you into thinking
+that the click was not accurate or that the request failed without any
+visible error message. This technique can be effective against users
+that are opening many search results in multiple tabs (the user can at
+some point go to a tab with the phishing site and use it instead of
+the original site).  </p> </li>
+
+</ol>
+
+<p>
+If you are concerned that your browsing habits may make you
+susceptible to such phishing schemes, consider not passing referer to
+visited sites. <a
+href="http://cafe.elharo.com/privacy/privacy-tip-3-block-referer-headers-in-firefox/">Firefox</a>
+and <a href="http://www.opera.com/support/kb/view/93/">Opera</a> have
+built-in settings for it, <a
+href="http://blog.arpitnext.com/external-noreferrer-chrome">Chrome and
+Safari</a> have external extensions, <a
+href="http://answers.microsoft.com/en-us/ie/forum/ie9-windows_7/disable-sending-of-http-referrer/98745583-0752-4987-9d77-ba7915f6dac9">IE</a>
+does not seem to offer an easy way to do it.
+</p>
+
+<a href="index.html">Back</a>
+</div>
+    <a href="life.html"><img class="life" src="still_life.png" alt="still life" align="right"/></a>
+</body>
+</html>

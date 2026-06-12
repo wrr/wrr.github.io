@@ -1,0 +1,61 @@
+/proc/self/exe overwrite from within a user namespace
+=====================================================
+
+I work on `Drop <https://github.com/wrr/drop>`_, a Linux sandboxing
+tool that uses user namespaces. As part of the work I have reviewed
+past vulnerabilities in similar programs.
+
+One such vulnerability was `CVE-2019-5736
+<https://nvd.nist.gov/vuln/detail/cve-2019-5736>`_; it allowed rogue
+processes that ran within a Docker container to escape the container
+by overwriting the container initialization binary (runc) exposed to
+the container via ``/proc/self/exe``.
+
+The exploitation wasn't just a simple write to ``/proc/self/exe``, it
+required several steps, which I found best described in `a post
+<https://blog.dragonsector.pl/2019/02/cve-2019-5736-escape-from-docker-and.html>`_
+by researchers who discovered the problem.
+
+The often-repeated comment about this vulnerability was that the
+problem was that runc runs as root. The original runc bug announcement
+mentions: "The vulnerability is blocked through correct use of user
+namespaces (where the host root is not mapped into the container's
+user namespace).". Posts in the Hacker News `discussion about the bug
+<https://news.ycombinator.com/item?id=19135701>`_ mention that user
+namespaces are the answer and that running a container as root is careless.
+
+The comments did not explain why rootless containers are not affected,
+and the exploit steps didn't look like something that obviously
+couldn't be done in the user namespace, so, to be safe, I tried to
+redo the exploit for Drop.  The original exploit replaced a library
+that the runc executable loads dynamically with a rogue one, which
+allowed it to execute attacker-controlled code within the sandboxed
+runc. This in turn allowed to replace the original runc binary by
+overwriting the content of ``/proc/self/exe``. This is not possible
+with Drop for several reasons:
+
+* The Drop executable is statically linked
+* Even if it were linked dynamically, Drop is not a
+  container; the sandboxed process is not able to control the content of
+  the root filesystem and place its own libraries in ``/usr``.
+* The sandboxed process is also not able to change the content of the
+  ``LD_PRELOAD`` environment variable it is run with.
+
+None of these reasons are fundamental to user namespaces. I changed
+the Drop executable to work around the obstacles, and with these
+changes I was able to replace the executable from within the sandbox.
+The conclusion of my experiments is that rootless containers are safe
+without an additional mitigation mechanism, but **ONLY** if the
+container initialization binary is owned and writable only by root.
+
+If the initialization binary is placed in, say, ``~/.local/bin`` and
+is owned by the current user, it can be susceptible to CVE-2019-5736
+in the same way that runc was, and can require additional mitigation
+to protect against this vulnerability; user namespaces alone are not
+enough.
+
+
+.. author:: default
+.. categories:: none
+.. tags:: none
+.. comments::

@@ -5,8 +5,61 @@
         <link>https://mixedbit.org/blog/</link>
         <description></description>
         <language>en-us</language>
-        <pubDate>Mon, 16 Dec 2024 00:00:00 +0000</pubDate>
+        <pubDate>Fri, 12 Jun 2026 00:00:00 +0000</pubDate>
         
+        <item>
+            <link>https://mixedbit.org/blog/2026/06/12/proc_self_exe_overwrite_from_within_a_user_namespace.html</link>
+            <guid>https://mixedbit.org/blog/2026/06/12/proc_self_exe_overwrite_from_within_a_user_namespace.html</guid>
+            <title><![CDATA[/proc/self/exe overwrite from within a user namespace]]></title>
+            <description><![CDATA[<h1>/proc/self/exe overwrite from within a user namespace</h1>
+<p>I work on <a class="reference external" href="https://github.com/wrr/drop">Drop</a>, a Linux sandboxing
+tool that uses user namespaces. As part of the work I have reviewed
+past vulnerabilities in similar programs.</p>
+<p>One such vulnerability was <a class="reference external" href="https://nvd.nist.gov/vuln/detail/cve-2019-5736">CVE-2019-5736</a>; it allowed rogue
+processes that ran within a Docker container to escape the container
+by overwriting the container initialization binary (runc) exposed to
+the container via <span class="docutils literal"><span class="pre">/proc/self/exe</span></span>.</p>
+<p>The exploitation wasn’t just a simple write to <span class="docutils literal"><span class="pre">/proc/self/exe</span></span>, it
+required several steps, which I found best described in <a class="reference external" href="https://blog.dragonsector.pl/2019/02/cve-2019-5736-escape-from-docker-and.html">a post</a>
+by researchers who discovered the problem.</p>
+<p>The often-repeated comment about this vulnerability was that the
+problem was that runc runs as root. The original runc bug announcement
+mentions: “The vulnerability is blocked through correct use of user
+namespaces (where the host root is not mapped into the container’s
+user namespace).”. Posts in the Hacker News <a class="reference external" href="https://news.ycombinator.com/item?id=19135701">discussion about the bug</a> mention that user
+namespaces are the answer and that running a container as root is careless.</p>
+<p>The comments did not explain why rootless containers are not affected,
+and the exploit steps didn’t look like something that obviously
+couldn’t be done in the user namespace, so, to be safe, I tried to
+redo the exploit for Drop.  The original exploit replaced a library
+that the runc executable loads dynamically with a rogue one, which
+allowed it to execute attacker-controlled code within the sandboxed
+runc. This in turn allowed to replace the original runc binary by
+overwriting the content of <span class="docutils literal"><span class="pre">/proc/self/exe</span></span>. This is not possible
+with Drop for several reasons:</p>
+<ul class="simple">
+<li>The Drop executable is statically linked</li>
+<li>Even if it were linked dynamically, Drop is not a
+container; the sandboxed process is not able to control the content of
+the root filesystem and place its own libraries in <span class="docutils literal"><span class="pre">/usr</span></span>.</li>
+<li>The sandboxed process is also not able to change the content of the
+<span class="docutils literal"><span class="pre">LD_PRELOAD</span></span> environment variable it is run with.</li>
+</ul>
+<p>None of these reasons are fundamental to user namespaces. I changed
+the Drop executable to work around the obstacles, and with these
+changes I was able to replace the executable from within the sandbox.
+The conclusion of my experiments is that rootless containers are safe
+without an additional mitigation mechanism, but <strong>ONLY</strong> if the
+container initialization binary is owned and writable only by root.</p>
+<p>If the initialization binary is placed in, say, <span class="docutils literal"><span class="pre">~/.local/bin</span></span> and
+is owned by the current user, it can be susceptible to CVE-2019-5736
+in the same way that runc was, and can require additional mitigation
+to protect against this vulnerability; user namespaces alone are not
+enough.</p>
+]]></description>
+             <pubDate>Fri, 12 Jun 2026 00:00:00 +0000</pubDate>
+        </item>
+    
         <item>
             <link>https://mixedbit.org/blog/2024/12/16/improving_unit_test_coverage_with_gemini.html</link>
             <guid>https://mixedbit.org/blog/2024/12/16/improving_unit_test_coverage_with_gemini.html</guid>

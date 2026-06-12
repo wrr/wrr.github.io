@@ -29,58 +29,24 @@
         </span>
       </div><div class="main-container" role="main"><div class="main wrapper body clearfix"><article>
                     <div class="section">
-            <h1><a href="2012/12/16/c___puzzle.html">C++ puzzle</a></h1>
-<p>You have a C++ class with all methods marked <span class="docutils literal"><span class="pre">const</span></span>, no
-<span class="docutils literal"><span class="pre">operator=</span></span> and one private field <span class="docutils literal"><span class="pre">x</span></span> initialized by the
-constructor and not market <span class="docutils literal"><span class="pre">mutable</span></span>. Can a value of <span class="docutils literal"><span class="pre">x</span></span> change after
-an object is created?</p>
-<p>For example, for a class below:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span/><span class="k">class</span><span class="w"> </span><span class="nc">Puzzle</span><span class="w"> </span><span class="p">{</span>
-<span class="w"> </span><span class="k">public</span><span class="o">:</span>
-<span class="w">  </span><span class="n">Puzzle</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">x_arg</span><span class="p">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">x</span><span class="p">(</span><span class="n">x_arg</span><span class="p">)</span><span class="w"> </span><span class="p">{}</span>
-
-<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">get_x</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">x</span><span class="p">;</span>
-<span class="w">  </span><span class="p">}</span>
-
-<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="n">someMethod1</span><span class="p">(...)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span>
-<span class="w">   </span><span class="p">...</span>
-<span class="w">  </span><span class="p">}</span>
-
-<span class="w">  </span><span class="n">SomeReturnValue</span><span class="w"> </span><span class="n">someMethod2</span><span class="p">(...)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span>
-<span class="w">   </span><span class="p">...</span>
-<span class="w">  </span><span class="p">}</span>
-
-<span class="w"> </span><span class="k">private</span><span class="o">:</span>
-<span class="w">  </span><span class="c1">// Disable default operator=</span>
-<span class="w">  </span><span class="n">Puzzle</span><span class="o">&amp;</span><span class="w"> </span><span class="k">operator</span><span class="o">=</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Puzzle</span><span class="o">&amp;</span><span class="p">);</span>
-
-<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="p">;</span>
-<span class="p">};</span>
-</pre></div>
-</div>
-<p>Can <span class="docutils literal"><span class="pre">x</span></span> change and how?</p>
-<p>The code must compile with no warnings. Rule out abuses like direct
-memory writes, incorrect casts or casting away constness like:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span/><span class="k">class</span><span class="w"> </span><span class="nc">Puzzle</span><span class="w"> </span><span class="p">{</span>
-<span class="w"> </span><span class="k">public</span><span class="o">:</span>
-<span class="w">  </span><span class="p">...</span>
-
-<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="n">set_x</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">new_x</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span>
-<span class="w">   </span><span class="c1">// This is abusive and doesn't count.</span>
-<span class="w">   </span><span class="k">const_cast</span><span class="o">&lt;</span><span class="n">Puzzle</span><span class="w"> </span><span class="o">*&gt;</span><span class="p">(</span><span class="k">this</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">new_x</span><span class="p">;</span>
-<span class="w">  </span><span class="p">}</span>
-
-<span class="w">  </span><span class="p">...</span>
-<span class="p">};</span>
-</pre></div>
-</div>
-<p>See <a class="reference external" href="/blog/pages/puzzle_answer.html">the solution</a>.</p>
+            <h1><a href="2013/01/31/wwwhisper_heroku_add_on.html">wwwhisper Heroku add-on</a></h1>
+<p>I’ve worked recently on making <a class="reference external" href="https://github.com/wrr/wwwhisper">wwwhisper authorization</a> available as a service for Heroku
+applications. This greatly simplifies wwwhisper setup and
+management. You can enable wwwhisper add-on for any Ruby based
+application with just <a class="reference external" href="https://github.com/wrr/rack-wwwhisper/blob/master/heroku-doc.md">3 lines of
+config</a>!</p>
+<p>Following Heroku add-on development processes, the wwwhisper add-on is
+now in alpha testing phase and needs to be successfully used by
+several users before it can move to closed beta, then open beta and
+finally be officially released.</p>
+<p>A grand plan is to offer a basic free plan and a fully-featured paid
+plan to cover the cost of infrastructure and support further
+development of wwwhisper.</p>
 
         </div>
         <div class="postmeta">
         <div class="author">
-            <span>Posted by Jan Wrobel; December 16, 2012</span>
+            <span>Posted by Jan Wrobel; January 31, 2013</span>
         </div>
         
         
@@ -89,6 +55,8 @@ memory writes, incorrect casts or casting away constness like:</p>
     </div></article><aside class="sidebar"><section><div class="widget">
     <h1>All posts</h1>
     <ul><li >
+            <a href="2026/06/12/proc_self_exe_overwrite_from_within_a_user_namespace.html">/proc/self/exe overwrite from within a user namespace</a>
+        </li><li >
             <a href="2024/12/16/improving_unit_test_coverage_with_gemini.html">Improving Unit Test Coverage with Gemini</a>
         </li><li >
             <a href="2014/08/18/shapespark.html">Shapespark</a>

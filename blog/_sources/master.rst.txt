@@ -4,6 +4,7 @@ Sitemap
 .. toctree::
    :maxdepth: 1
 
+   2026/06/12/proc_self_exe_overwrite_from_within_a_user_namespace
    2024/12/16/improving_unit_test_coverage_with_gemini
    2014/08/18/shapespark
    2014/01/08/wwwhisper_add_on_for_node_js
